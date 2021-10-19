@@ -30,7 +30,7 @@ function LoginScreen() {
         .then(response => response.json())
         .then(responseData => {
           if (responseData == 1) {
-            Alert.alert('Successful', 'You have logged in your account!');
+            Alert.alert('Successful', 'Logged in');
           }
         })
         .done();

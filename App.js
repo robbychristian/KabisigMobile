@@ -6,7 +6,9 @@ import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import Welcome from './screens/Welcome';
 import Login from './screens/Login';
-import Register from './screens/Register';
+import FirstRegister from './screens/FirstRegister';
+import SecondRegister from './screens/SecondRegister';
+import {createDrawerNavigator} from '@react-navigation/drawer';
 
 function WelcomeScreen() {
   return <Welcome />;
@@ -16,20 +18,40 @@ function LoginScreen() {
   return <Login />;
 }
 
-function RegisterScreen() {
-  return <Register />;
+function FirstRegisterScreen() {
+  return <FirstRegister />;
+}
+
+function SecondRegisterScreen() {
+  return <SecondRegister />;
 }
 
 const Stack = createNativeStackNavigator();
+const HomeStack = createNativeStackNavigator();
+const Drawer = createDrawerNavigator();
+const HomeStackScreen = () => {
+  return (
+    <HomeStack.Navigator>
+      <HomeStack.Screen name="Welcome" component={WelcomeScreen} />
+      <HomeStack.Screen name="Login" component={LoginScreen} />
+      <HomeStack.Screen
+        name="FirstRegister"
+        component={FirstRegisterScreen}
+        options={{title: 'Register'}}
+      />
+      <HomeStack.Screen
+        name="SecondRegister"
+        component={SecondRegisterScreen}
+        options={{title: 'Register'}}
+      />
+    </HomeStack.Navigator>
+  );
+};
 
 function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator>
-        <Stack.Screen name="Welcome" component={WelcomeScreen} />
-        <Stack.Screen name="Login" component={LoginScreen} />
-        <Stack.Screen name="Register" component={RegisterScreen} />
-      </Stack.Navigator>
+      <HomeStackScreen />
     </NavigationContainer>
   );
 }
