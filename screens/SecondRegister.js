@@ -13,6 +13,7 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {NavigationContainer} from '@react-navigation/native';
 import {useNavigation} from '@react-navigation/native';
 import {useRoute} from '@react-navigation/native';
+import {useValidation} from 'react-native-form-validator';
 
 const SecondRegisterScreen = () => {
   const navigation = useNavigation();
@@ -23,15 +24,73 @@ const SecondRegisterScreen = () => {
   const email = route.params.email;
   const pass = route.params.pass;
 
-  const [selectBrgy, setSelectedBrgy] = useState();
-  const [monthBday, setMonthBday] = useState();
-  const [dayBday, setDayBday] = useState();
-  const [yearBday, setYearBday] = useState();
-  const [contactNumber, setContactNumber] = useState();
+  const [home_add, sethome_add] = useState(null);
+  const [brgy, setSelectedBrgy] = useState(null);
+  const [mbday, setmbday] = useState(null);
+  const [dbday, setdbday] = useState(null);
+  const [ybday, setybday] = useState(null);
+  const [cnum, setcnum] = useState(null);
 
-  if (monthBday == 2) {
-    return FebDays;
-  }
+  const {validate, isFieldInError, getErrorsInField, getErrorMessages} =
+    useValidation({
+      state: {brgy, mbday, dbday, ybday, cnum},
+    });
+
+  const submitForm = function () {
+    if (
+      home_add == null ||
+      brgy == null ||
+      mbday == null ||
+      dbday == null ||
+      ybday == null ||
+      cnum == null
+    ) {
+      Alert.alert('Field(s) are empty', 'Fill up all the forms');
+    } else if (
+      (mbday == '2' && (dbday == 29 || dbday == 30 || dbday == 31)) ||
+      ((mbday == 4 || mbday == 6 || mbday == 8 || mbday == 10 || mbday == 12) &&
+        dbday == 31)
+    ) {
+      Alert.alert('Invalid Date', 'The day you chose is invalid.');
+    } else if (
+      validate({
+        brgy: {required: true},
+        mbday: {required: true},
+        dbday: {required: true},
+        ybday: {required: true},
+        cnum: {required: true, minlength: 11, maxlength: 11},
+      })
+    ) {
+      const data = {
+        fname: fname,
+        mname: mname,
+        lname: lname,
+        email: email,
+        pass: pass,
+        home_add: home_add,
+        brgy: brgy,
+        mbday: mbday,
+        dbday: dbday,
+        ybday: ybday,
+        cnum: cnum,
+      };
+      fetch('https://kabisigapp.com/api/register/' + data, {
+        method: 'POST',
+      })
+        .then(response => response.json())
+        .then(responseData => {
+          console.log('responseData');
+        })
+        .catch(error => {
+          console.log(data.fname);
+        });
+    } else {
+      isFieldInError('cnum') &&
+        getErrorsInField('cnum').map(e => {
+          Alert.alert('A field is not properly field', e);
+        });
+    }
+  };
 
   return (
     <KeyboardAvoidingView style={styles.container}>
@@ -40,6 +99,7 @@ const SecondRegisterScreen = () => {
       </View>
       <View style={styles.formContainer}>
         <TextInput
+          onChangeText={sethome_add}
           style={styles.formInput}
           returnKeyType="next"
           placeholder="Home Address"
@@ -47,7 +107,7 @@ const SecondRegisterScreen = () => {
         <TouchableOpacity style={styles.pickerContainer}>
           <Picker
             style={{marginLeft: -13, fontSize: 20}}
-            selectedValue={selectBrgy}
+            selectedValue={brgy}
             itemStyle={{fontSize: 20}}
             onValueChange={setSelectedBrgy}>
             <Picker.Item label="Choose a barangay" value="" />
@@ -58,9 +118,9 @@ const SecondRegisterScreen = () => {
         <TouchableOpacity style={styles.pickerContainer}>
           <Picker
             style={{marginLeft: -13, fontSize: 20}}
-            selectedValue={monthBday}
+            selectedValue={mbday}
             itemStyle={{fontSize: 20}}
-            onValueChange={setMonthBday}>
+            onValueChange={setmbday}>
             <Picker.Item label="Birth Month" value="" />
             <Picker.Item label="January" value="1" />
             <Picker.Item label="February" value="2" />
@@ -79,9 +139,9 @@ const SecondRegisterScreen = () => {
         <TouchableOpacity style={styles.pickerContainer}>
           <Picker
             style={{marginLeft: -13, fontSize: 20}}
-            selectedValue={dayBday}
+            selectedValue={dbday}
             itemStyle={{fontSize: 20}}
-            onValueChange={setDayBday}>
+            onValueChange={setdbday}>
             <Picker.Item label="Birth Day" value="" />
             <Picker.Item label="1" value="1" />
             <Picker.Item label="2" value="2" />
@@ -119,9 +179,9 @@ const SecondRegisterScreen = () => {
         <TouchableOpacity style={styles.pickerContainer}>
           <Picker
             style={{marginLeft: -13, fontSize: 20}}
-            selectedValue={yearBday}
+            selectedValue={ybday}
             itemStyle={{fontSize: 20}}
-            onValueChange={setYearBday}>
+            onValueChange={setybday}>
             <Picker.Item label="Birth Year" value="" />
             <Picker.Item label="1920" value="1920" />
             <Picker.Item label="1921" value="1921" />
@@ -231,8 +291,9 @@ const SecondRegisterScreen = () => {
           returnKeyType="next"
           placeholder="Contact Number"
           keyboardType="number-pad"
+          onChangeText={setcnum}
         />
-        <TouchableOpacity style={styles.nextBtn}>
+        <TouchableOpacity style={styles.nextBtn} onPress={submitForm}>
           <Text style={{color: '#FFF'}}>Submit</Text>
         </TouchableOpacity>
       </View>

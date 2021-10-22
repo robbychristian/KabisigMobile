@@ -13,16 +13,21 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {NavigationContainer} from '@react-navigation/native';
 import {useNavigation} from '@react-navigation/native';
 import {useRoute} from '@react-navigation/native';
+import {useValidation} from 'react-native-form-validator';
 
 const FirstRegisterScreen = () => {
   const navigation = useNavigation();
-  const rotue = useRoute();
+  const route = useRoute();
   const [fname, setFname] = useState(null);
   const [mname, setMname] = useState(null);
   const [lname, setLname] = useState(null);
   const [email, setEmail] = useState(null);
   const [pass, setPass] = useState(null);
   const [confPass, setConfPass] = useState(null);
+  const {validate, isFieldInError, getErrorsInField, getErrorMessages} =
+    useValidation({
+      state: {fname, mname, lname, email, pass, confPass},
+    });
 
   const validateData = function () {
     if (
@@ -34,7 +39,16 @@ const FirstRegisterScreen = () => {
       confPass == null
     ) {
       Alert.alert('Field(s) are empty', 'Fill up all the forms');
-    } else {
+    } else if (
+      validate({
+        fname: {minlength: 2, required: true},
+        mname: {minlength: 2, required: true},
+        lname: {minlength: 2, required: true},
+        email: {email: true, require: true},
+        pass: {minlength: 8, require: true},
+        confPass: {equalPassword: pass},
+      })
+    ) {
       navigation.push('SecondRegister', {
         fname: fname,
         mname: mname,
@@ -42,6 +56,15 @@ const FirstRegisterScreen = () => {
         email: email,
         pass: pass,
       });
+    } else {
+      isFieldInError('email') &&
+        getErrorsInField('email').map(e => {
+          Alert.alert('A field is not properly field', e);
+        });
+      isFieldInError('confPass') &&
+        getErrorsInField('confPass').map(e => {
+          Alert.alert('A field is not properly field', e);
+        });
     }
   };
 
