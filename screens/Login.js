@@ -24,13 +24,13 @@ function LoginScreen() {
 
   _onPressButtonGET = function () {
     if (email != '' || pass != '') {
-      fetch('https://kabisigapp.com/api/login/' + email + '/' + pass, {
+      fetch('https://kabisigapp.com/api/logincreds/' + email + '/' + pass, {
         method: 'GET',
       })
         .then(response => response.json())
         .then(responseData => {
           if (responseData == 1) {
-            Alert.alert('Successful', 'Logged in');
+            navigation.navigate();
           }
         })
         .done();
