@@ -17,7 +17,10 @@ function Home() {
 
   return (
     <SafeAreaView>
-      <Text>Test</Text>
+      <Text>Flood</Text>
+      <Text>Earthquake</Text>
+      <Text>Tsunami</Text>
+      <Text>Tropical Cyclone</Text>
     </SafeAreaView>
   );
 }

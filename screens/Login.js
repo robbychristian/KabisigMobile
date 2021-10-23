@@ -22,7 +22,7 @@ function LoginScreen() {
   const [email, onChangeEmail] = useState(null);
   const [pass, onChangePass] = useState(null);
 
-  _onPressButtonGET = function () {
+  const _onPressButtonGET = function () {
     if (email != '' || pass != '') {
       fetch('https://kabisigapp.com/api/logincreds/' + email + '/' + pass, {
         method: 'GET',
@@ -30,8 +30,34 @@ function LoginScreen() {
         .then(response => response.json())
         .then(responseData => {
           if (responseData == 1) {
-            navigation.navigate();
+            fetch('https://kabisigapp.com/api/fetch/' + email, {
+              method: 'GET',
+            })
+              .then(response => response.json())
+              .then(responseData => {
+                if (responseData[0].email_verified_at != null) {
+                  navigation.reset({
+                    index: 0,
+                    routes: [
+                      {
+                        name: 'HomeLogin',
+                      },
+                    ],
+                  });
+                } else {
+                  Alert.alert(
+                    'Login Failed',
+                    'Make sure that your email is verified!',
+                  );
+                }
+              });
           }
+        })
+        .catch(e => {
+          Alert.alert(
+            'Invalid Credentials',
+            'Credentials does not match anything in the record.',
+          );
         })
         .done();
     } else {

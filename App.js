@@ -8,7 +8,12 @@ import Welcome from './screens/Welcome';
 import Login from './screens/Login';
 import FirstRegister from './screens/FirstRegister';
 import SecondRegister from './screens/SecondRegister';
+import Home from './screens/Home';
 import {createDrawerNavigator} from '@react-navigation/drawer';
+
+function HomeScreen() {
+  return <Home />;
+}
 
 function WelcomeScreen() {
   return <Welcome />;
@@ -29,9 +34,19 @@ function SecondRegisterScreen() {
 const Stack = createNativeStackNavigator();
 const HomeStack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
+const DrawerStackScreen = () => {
+  return (
+    <Drawer.Navigator>
+      <Drawer.Screen name="Home" component={HomeScreen} />
+    </Drawer.Navigator>
+  );
+};
 const HomeStackScreen = () => {
   return (
-    <HomeStack.Navigator>
+    <HomeStack.Navigator
+      screenOptions={{
+        headerShown: false,
+      }}>
       <HomeStack.Screen name="Welcome" component={WelcomeScreen} />
       <HomeStack.Screen name="Login" component={LoginScreen} />
       <HomeStack.Screen
@@ -44,6 +59,7 @@ const HomeStackScreen = () => {
         component={SecondRegisterScreen}
         options={{title: 'Register'}}
       />
+      <HomeStack.Screen name="HomeLogin" component={DrawerStackScreen} />
     </HomeStack.Navigator>
   );
 };
