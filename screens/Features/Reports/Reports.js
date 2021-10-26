@@ -66,6 +66,7 @@ function Reports() {
           </View>
           <View style={styles.flatListContainer}>
             <FlatList
+              nestedScrollEnabled
               data={data}
               keyExtractor={({id}, index) => id}
               renderItem={({item}) => (
