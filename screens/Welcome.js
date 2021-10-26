@@ -12,7 +12,7 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {NavigationContainer} from '@react-navigation/native';
 import {useNavigation} from '@react-navigation/native';
 
-function WelcomeScreen({}) {
+function WelcomeScreen() {
   const navigation = useNavigation();
   return (
     <SafeAreaView style={styles.background}>

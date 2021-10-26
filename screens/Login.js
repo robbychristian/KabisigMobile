@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useContext} from 'react';
 import {
   View,
   Image,
@@ -16,11 +16,15 @@ import {
 import {NavigationContainer} from '@react-navigation/native';
 import {useNavigation} from '@react-navigation/native';
 import {CommonActions} from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/FontAwesome';
+import {UserContext} from '../provider/UserProvider';
 
 function LoginScreen() {
+  const user = useContext(UserContext);
   const navigation = useNavigation();
   const [email, onChangeEmail] = useState(null);
   const [pass, onChangePass] = useState(null);
+  const [isLoading, setLoading] = useState(true);
 
   const _onPressButtonGET = function () {
     if (email != '' || pass != '') {
@@ -36,6 +40,17 @@ function LoginScreen() {
               .then(response => response.json())
               .then(responseData => {
                 if (responseData[0].email_verified_at != null) {
+                  user.id = responseData[0].id;
+                  user.fname = responseData[0].first_name;
+                  user.mname = responseData[0].middle_name;
+                  user.lname = responseData[0].last_name;
+                  user.brgy = responseData[0].brgy_loc;
+                  user.email = responseData[0].email;
+                  user.pass = responseData[0].password;
+                  user.profilePic = responseData[0].profile_pic;
+                  user.contactNo = responseData[0].contact_no;
+                  user.isBlocked = responseData[0].is_blocked;
+                  user.homeAdd = responseData[0].home_add;
                   navigation.reset({
                     index: 0,
                     routes: [
@@ -44,6 +59,11 @@ function LoginScreen() {
                       },
                     ],
                   });
+                } else if (responseData[0].is_deactivated == 1) {
+                  Alert.alert(
+                    'Login Failed',
+                    'It seems like your account has been deactivated.',
+                  );
                 } else {
                   Alert.alert(
                     'Login Failed',
