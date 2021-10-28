@@ -25,25 +25,60 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import GetLocation from 'react-native-get-location';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import {useValidation} from 'react-native-form-validator';
+import mime from 'mime';
 
 function AddReports() {
   const context = useContext(UserContext);
-  const userId = context.id;
-  const userFName = context.fname;
-  const userMName = context.mname;
-  const userLName = context.lname;
-  const [reportTitle, setReportTitle] = useState('');
-  const [reportDesc, setReportDesc] = useState('');
-  const [imgReportUri, setImgReportUri] = useState('no_Image.jpg');
+  const user_id = context.id;
+  const full_name = context.fname + ' ' + context.mname + ' ' + context.lname;
+  const status = 'Report Pending';
+  const [title, setReportTitle] = useState('');
+  const [description, setReportDesc] = useState('');
+  const [loc_img, setImgReportUri] = useState('no_Image.jpg');
   const [imgReportType, setImgReportType] = useState('');
   const [photo, setPhoto] = useState();
-  const [locLatitude, setLocLatitude] = useState('');
-  const [locLongitude, setLocLongitude] = useState('');
+  const [loc_lat, setLocLatitude] = useState('');
+  const [loc_lng, setLocLongitude] = useState('');
   const {validate, isFieldInError, getErrorsInField, getErrorMessages} =
     useValidation({
-      state: {reportTitle, reportDesc, imgReportUri, locLatitude, locLongitude},
+      state: {title, description, loc_img, loc_lat, loc_lng},
     });
+
   const formdata = new FormData();
+  const submit = () => {
+    if (title != '' || description != '' || loc_lat != '' || loc_lng != '') {
+      formdata.append('image', {
+        uri: loc_img,
+        name: full_name + loc_lat + loc_lng,
+        type: imgReportType,
+      });
+      formdata.append('user_id', user_id);
+      formdata.append('full_name', full_name);
+      formdata.append('title', title);
+      formdata.append('description', description);
+      formdata.append('status', status);
+      formdata.append('loc_lat', loc_lat);
+      formdata.append('loc_lng', loc_lng);
+      formdata.append('loc_img', loc_img);
+      fetch('https://kabisigapp.com/api/reports/', {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'multipart/form-data',
+        },
+        body: formdata._parts,
+      })
+        .then(response => response.json())
+        .then(response => {
+          console.log(formdata._parts);
+          console.log(response);
+        })
+        .catch(e => {
+          console.log(e);
+        });
+    }
+  };
 
   useEffect(() => {
     GetLocation.getCurrentPosition({
@@ -59,23 +94,6 @@ function AddReports() {
         console.warn(code, message);
       });
   }, []);
-
-  const potangina = function () {
-    fetch('https://kabisigapp.com/api/deployreport/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-      body: formdata,
-    })
-      .then(res => checkStatus(res))
-      .then(res => res.json())
-      .then(res => {
-        console.log('response' + JSON.stringify(res));
-      })
-      .catch(e => console.log(e))
-      .done();
-  };
 
   const openCamera = () => {
     const options = {
@@ -93,27 +111,26 @@ function AddReports() {
         console.log('User tapped custom button: ', response.customButton);
         alert(response.customButton);
       } else {
-        setImgReportUri(response.assets[0].uri);
+        setImgReportUri(
+          'file:///' + response.assets[0].uri.split('file:/').join(''),
+        );
         setPhoto(response.assets[0]);
         setImgReportType(response.assets[0].type);
-        formdata.append('image', {
-          uri: response.assets[0].uri,
-          name: userFName + locLatitude + locLongitude,
-          type: response.assets[0].type,
-        });
-        formdata.append('Content-Type', 'image/jpg');
-        formdata.append('user_id', userId);
-        formdata.append(
-          'full_name',
-          userFName + ' ' + userMName + ' ' + userLName,
-        );
-        formdata.append('title', reportTitle);
-        formdata.append('description', reportDesc);
-        formdata.append('status', 'Report Pending');
-        formdata.append('loc_lat', locLatitude.toString());
-        formdata.append('loc_lng', locLongitude.toString());
-        formdata.append('loc_img', userId + userFName + reportTitle);
-        console.log(formdata._parts);
+
+        //formdata.append('image', {
+        //  uri: response.assets[0].uri,
+        //  name: full_name + loc_lat + loc_lng,
+        //  type: response.assets[0].type,
+        //});
+        //formdata.append('user_id', user_id);
+        //formdata.append('full_name', full_name);
+        //formdata.append('title', title);
+        //formdata.append('description', description);
+        //formdata.append('status', status);
+        //formdata.append('loc_lat', loc_lat);
+        //formdata.append('loc_lng', loc_lng);
+        //formdata.append('loc_img', loc_img);
+        console.log(formdata._parts[0]);
       }
     });
   };
@@ -258,12 +275,12 @@ function AddReports() {
                 marginHorizontal: 10,
               }}>
               <Image
-                source={{uri: imgReportUri}}
+                source={{uri: loc_img}}
                 style={{flex: 1, height: 100, width: 100, alignSelf: 'center'}}
               />
             </View>
           </View>
-          <TouchableOpacity style={styles.submitBtn} onPress={potangina}>
+          <TouchableOpacity style={styles.submitBtn} onPress={submit}>
             <Text style={{fontSize: 15, fontWeight: 'bold', color: 'white'}}>
               Submit
             </Text>
@@ -300,8 +317,10 @@ const styles = StyleSheet.create({
     height: '100%',
     paddingLeft: 5,
     paddingTop: 10,
+    color: '#000',
   },
   inputBody: {
+    color: '#000',
     borderWidth: 1,
     borderColor: '#000',
     width: '75%',

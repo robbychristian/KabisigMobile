@@ -138,6 +138,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   formInput: {
+    color: '#000',
     height: '13%',
     width: '75%',
     margin: 12,
