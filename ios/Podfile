@@ -12,6 +12,10 @@ target 'Kabisig' do
     :hermes_enabled => false
   )
 
+  pod 'react-native-image-picker', :path => '../node_modules/react-native-image-picker'
+
+  pod 'ReactNativeGetLocation', :path => '../node_modules/react-native-get-location'
+
   target 'KabisigTests' do
     inherit! :complete
     # Pods for testing

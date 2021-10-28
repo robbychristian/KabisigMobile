@@ -21,7 +21,6 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import {UserContext} from '../../../provider/UserProvider';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {format, formatDistance, formatRelative, subDays} from 'date-fns';
-import {Dimensions} from 'react-native';
 
 function Reports() {
   const user = useContext(UserContext);

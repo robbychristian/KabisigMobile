@@ -9,6 +9,8 @@ import {
   KeyboardAvoidingView,
   Alert,
   FlatList,
+  PermissionsAndroid,
+  Permission,
 } from 'react-native';
 import {
   createNativeStackNavigator,
@@ -20,10 +22,102 @@ import {CommonActions} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import {UserContext} from '../../../provider/UserProvider';
 import {SafeAreaView} from 'react-native-safe-area-context';
-import {format, formatDistance, formatRelative, subDays} from 'date-fns';
+import GetLocation from 'react-native-get-location';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
+import {useValidation} from 'react-native-form-validator';
 
 function AddReports() {
+  const context = useContext(UserContext);
+  const userId = context.id;
+  const userFName = context.fname;
+  const userMName = context.mname;
+  const userLName = context.lname;
+  const [reportTitle, setReportTitle] = useState('');
+  const [reportDesc, setReportDesc] = useState('');
+  const [imgReportUri, setImgReportUri] = useState('no_Image.jpg');
+  const [imgReportType, setImgReportType] = useState('');
+  const [photo, setPhoto] = useState();
+  const [locLatitude, setLocLatitude] = useState('');
+  const [locLongitude, setLocLongitude] = useState('');
+  const {validate, isFieldInError, getErrorsInField, getErrorMessages} =
+    useValidation({
+      state: {reportTitle, reportDesc, imgReportUri, locLatitude, locLongitude},
+    });
+  const formdata = new FormData();
+
+  useEffect(() => {
+    GetLocation.getCurrentPosition({
+      enableHighAccuracy: true,
+      timeout: 15000,
+    })
+      .then(location => {
+        setLocLatitude(location.latitude);
+        setLocLongitude(location.longitude);
+      })
+      .catch(error => {
+        const {code, message} = error;
+        console.warn(code, message);
+      });
+  }, []);
+
+  const potangina = function () {
+    fetch('https://kabisigapp.com/api/deployreport/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+      body: formdata,
+    })
+      .then(res => checkStatus(res))
+      .then(res => res.json())
+      .then(res => {
+        console.log('response' + JSON.stringify(res));
+      })
+      .catch(e => console.log(e))
+      .done();
+  };
+
+  const openCamera = () => {
+    const options = {
+      storageOptions: {
+        saveToPhotos: true,
+        mediaType: 'photo',
+      },
+    };
+    launchCamera(options, response => {
+      if (response.didCancel) {
+        console.log('User cancelled image picker');
+      } else if (response.error) {
+        console.log('ImagePicker Error: ', response.error);
+      } else if (response.customButton) {
+        console.log('User tapped custom button: ', response.customButton);
+        alert(response.customButton);
+      } else {
+        setImgReportUri(response.assets[0].uri);
+        setPhoto(response.assets[0]);
+        setImgReportType(response.assets[0].type);
+        formdata.append('image', {
+          uri: response.assets[0].uri,
+          name: userFName + locLatitude + locLongitude,
+          type: response.assets[0].type,
+        });
+        formdata.append('Content-Type', 'image/jpg');
+        formdata.append('user_id', userId);
+        formdata.append(
+          'full_name',
+          userFName + ' ' + userMName + ' ' + userLName,
+        );
+        formdata.append('title', reportTitle);
+        formdata.append('description', reportDesc);
+        formdata.append('status', 'Report Pending');
+        formdata.append('loc_lat', locLatitude.toString());
+        formdata.append('loc_lng', locLongitude.toString());
+        formdata.append('loc_img', userId + userFName + reportTitle);
+        console.log(formdata._parts);
+      }
+    });
+  };
+
   const navigation = useNavigation();
   return (
     <SafeAreaView style={styles.container}>
@@ -111,7 +205,10 @@ function AddReports() {
               }}>
               Title:{' '}
             </Text>
-            <TextInput style={styles.inputTitle} />
+            <TextInput
+              style={styles.inputTitle}
+              onChangeText={setReportTitle}
+            />
           </View>
           <View
             style={{
@@ -126,6 +223,7 @@ function AddReports() {
             <TextInput
               multiline={true}
               textAlignVertical="top"
+              onChangeText={setReportDesc}
               style={styles.inputBody}></TextInput>
           </View>
           <View style={styles.sendImage}>
@@ -140,7 +238,8 @@ function AddReports() {
                 marginHorizontal: 10,
               }}>
               <TouchableOpacity
-                style={{alignItems: 'center', justifyContent: 'center'}}>
+                style={{alignItems: 'center', justifyContent: 'center'}}
+                onPress={openCamera}>
                 <Icon name="camera" color="#004F91" size={40} />
                 <Text
                   style={{fontSize: 15, fontWeight: 'bold', color: 'black'}}>
@@ -158,17 +257,13 @@ function AddReports() {
                 justifyContent: 'center',
                 marginHorizontal: 10,
               }}>
-              <TouchableOpacity
-                style={{alignItems: 'center', justifyContent: 'center'}}>
-                <Icon name="image" color="#004F91" size={40} />
-                <Text
-                  style={{fontSize: 15, fontWeight: 'bold', color: 'black'}}>
-                  Upload from gallery
-                </Text>
-              </TouchableOpacity>
+              <Image
+                source={{uri: imgReportUri}}
+                style={{flex: 1, height: 100, width: 100, alignSelf: 'center'}}
+              />
             </View>
           </View>
-          <TouchableOpacity style={styles.submitBtn}>
+          <TouchableOpacity style={styles.submitBtn} onPress={potangina}>
             <Text style={{fontSize: 15, fontWeight: 'bold', color: 'white'}}>
               Submit
             </Text>
