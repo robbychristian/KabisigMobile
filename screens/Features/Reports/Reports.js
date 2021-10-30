@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useContext} from 'react';
+import React, {useState, useEffect, useContext, useRef} from 'react';
 import {
   View,
   Image,
@@ -9,6 +9,8 @@ import {
   KeyboardAvoidingView,
   Alert,
   FlatList,
+  RefreshControl,
+  ActivityIndicator,
 } from 'react-native';
 import {
   createNativeStackNavigator,
@@ -20,30 +22,100 @@ import {CommonActions} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import {UserContext} from '../../../provider/UserProvider';
 import {SafeAreaView} from 'react-native-safe-area-context';
-import {format, formatDistance, formatRelative, subDays} from 'date-fns';
+import {
+  format,
+  formatDistance,
+  formatRelative,
+  getDate,
+  subDays,
+} from 'date-fns';
 
 function Reports() {
   const user = useContext(UserContext);
   const navigation = useNavigation();
   const [isLoading, setLoading] = useState(true);
   const [data, setData] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
+  //const [refreshing, setRefreshing] = useState(false);
+  //const [itemState, setItemState] = useState(data);
+
+  //useEffect(() => {
+  //  if (initialMount.current) {
+  //    initialMount.current = false;
+  //    //data.isFetching = false;
+  //    fetch('https://kabisigapp.com/api/fetchreport/' + user.id)
+  //      .then(response => response.json())
+  //      .then(json => {
+  //        setData(json);
+  //        setRefreshing(false);
+  //      })
+  //      .then(response => response.json())
+  //      .then(json => {
+  //        setData(json);
+  //      })
+  //      .catch(e => {
+  //        Alert.alert('Error', 'There was an error fetching reports.');
+  //      })
+  //      .finally(() => setLoading(false));
+  //  } else {
+  //    fetch('https://kabisigapp.com/api/fetchreport/' + user.id)
+  //      .then(response => response.json())
+  //      .then(json => {
+  //        setData(json);
+  //      })
+  //      .then(response => response.json())
+  //      .then(json => {
+  //        setData(json);
+  //      })
+  //      .catch(e => {
+  //        Alert.alert('Error', 'There was an error fetching reports.');
+  //      })
+  //      .finally(() => setLoading(false));
+  //  }
+  //}, []);
 
   useEffect(() => {
+    getData();
+  }, []);
+
+  const getData = () => {
+    //data.isFetching = false;
     fetch('https://kabisigapp.com/api/fetchreport/' + user.id)
       .then(response => response.json())
       .then(json => {
         setData(json);
+        setRefreshing(false);
       })
-      .catch(error => {
-        Alert.alert('Error', 'There was an error fetching reports.');
+      .then(response => response.json())
+      .then(json => {
+        setData(json);
+      })
+      .catch(e => {
+        //Alert.alert('Error', 'There was an error fetching reports.');
       })
       .finally(() => setLoading(false));
-  }, []);
+  };
+
+  const deleteReport = id => {
+    fetch('https://kabisigapp.com/api/deletereport/' + id)
+      .then(response => response.json())
+      .then(response => {
+        console.log(response);
+      })
+      .catch(e => {
+        console.log(e);
+      });
+  };
+
+  const onRefresh = () => {
+    setData([]);
+    getData();
+  };
 
   return (
     <SafeAreaView style={styles.container}>
       {isLoading ? (
-        <Text>Loading...</Text>
+        <ActivityIndicator size="large" />
       ) : (
         <View style={{flex: 1}}>
           <View style={styles.reportsContainer}>
@@ -65,10 +137,13 @@ function Reports() {
           </View>
           <View style={styles.flatListContainer}>
             <FlatList
+              refreshControl={
+                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+              }
               nestedScrollEnabled
               data={data}
               keyExtractor={({id}, index) => id}
-              renderItem={({item}) => (
+              renderItem={({item, index}) => (
                 <View style={styles.content}>
                   <View style={{flex: 2}}>
                     <Text style={styles.reportImg}> {item.img_loc} </Text>
@@ -76,9 +151,18 @@ function Reports() {
                   <View style={{flex: 10}}>
                     <Text style={styles.reportHeading}> {item.title} </Text>
                     <Text style={styles.reportDesc}> {item.description} </Text>
-                    <Text style={styles.reportStatus}> {item.status} </Text>
+                    <Text style={styles.reportStatus}> {item.id} </Text>
                   </View>
-                  <TouchableOpacity style={{flex: 1}}>
+                  <TouchableOpacity
+                    style={{flex: 1}}
+                    onPress={() => {
+                      deleteReport(item.id);
+                      setData(prevItemState =>
+                        prevItemState.filter(
+                          (_item, _Index) => _Index !== index,
+                        ),
+                      );
+                    }}>
                     <Icon name="trash" size={30} color="#d9534f" />
                   </TouchableOpacity>
                 </View>
@@ -99,7 +183,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   reportsContainer: {
-    flex: 1,
+    flex: 2,
     width: '100%',
     flexDirection: 'row',
   },
@@ -111,10 +195,11 @@ const styles = StyleSheet.create({
   reportBtn: {
     flex: 4,
     width: '100%',
-    height: '100%',
+    height: '50%',
     backgroundColor: '#004F91',
     justifyContent: 'center',
     alignItems: 'center',
+    alignSelf: 'center',
   },
   flatListContainer: {
     flex: 10,

@@ -98,9 +98,11 @@ function LoginScreen() {
         <TextInput
           style={styles.formInput}
           onChangeText={onChangeEmail}
+          placeholderTextColor="#808080"
           placeholder="Email"></TextInput>
         <TextInput
           style={styles.formInput}
+          placeholderTextColor="#808080"
           placeholder="Password"
           onChangeText={onChangePass}
           secureTextEntry={true}></TextInput>

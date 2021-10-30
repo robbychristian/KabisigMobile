@@ -11,6 +11,8 @@ import {
   FlatList,
   PermissionsAndroid,
   Permission,
+  ActivityIndicator,
+  Modal,
 } from 'react-native';
 import {
   createNativeStackNavigator,
@@ -25,7 +27,8 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import GetLocation from 'react-native-get-location';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import {useValidation} from 'react-native-form-validator';
-import mime from 'mime';
+import axios from 'axios';
+//import FormData from 'form-data';
 
 function AddReports() {
   const context = useContext(UserContext);
@@ -34,24 +37,33 @@ function AddReports() {
   const status = 'Report Pending';
   const [title, setReportTitle] = useState('');
   const [description, setReportDesc] = useState('');
-  const [loc_img, setImgReportUri] = useState('no_Image.jpg');
+  const [loc_imgUri, setImgReportUri] = useState('no_Image.jpg');
+  const [loc_imgName, setImgReportName] = useState('no_Image.jpg');
   const [imgReportType, setImgReportType] = useState('');
   const [photo, setPhoto] = useState();
   const [loc_lat, setLocLatitude] = useState('');
   const [loc_lng, setLocLongitude] = useState('');
+  const [modalVisible, setModalVisible] = useState(true);
+  const [isLoading, setLoading] = useState(false);
   const {validate, isFieldInError, getErrorsInField, getErrorMessages} =
     useValidation({
-      state: {title, description, loc_img, loc_lat, loc_lng},
+      state: {title, description, loc_lat, loc_lng},
     });
 
   const formdata = new FormData();
   const submit = () => {
     if (title != '' || description != '' || loc_lat != '' || loc_lng != '') {
-      formdata.append('image', {
-        uri: loc_img,
-        name: full_name + loc_lat + loc_lng,
-        type: imgReportType,
-      });
+      //formdata.append('image', {
+      //  uri: loc_img,
+      //  name: full_name + loc_lat + loc_lng,
+      //  type: imgReportType,
+      //});
+      let file = {
+        uri: loc_imgUri,
+        type: 'multipart/form-data',
+        name: loc_imgName,
+      };
+      formdata.append('photo', file);
       formdata.append('user_id', user_id);
       formdata.append('full_name', full_name);
       formdata.append('title', title);
@@ -59,23 +71,25 @@ function AddReports() {
       formdata.append('status', status);
       formdata.append('loc_lat', loc_lat);
       formdata.append('loc_lng', loc_lng);
-      formdata.append('loc_img', loc_img);
-      fetch('https://kabisigapp.com/api/reports/', {
+      formdata.append('loc_img', loc_imgName);
+      axios({
+        url: 'https://kabisigapp.com/api/uploadimage',
         method: 'POST',
-        mode: 'no-cors',
+        data: formdata,
         headers: {
-          Accept: 'application/json',
+          Accept: 'application/form-data',
           'Content-Type': 'multipart/form-data',
         },
-        body: formdata._parts,
       })
-        .then(response => response.json())
-        .then(response => {
-          console.log(formdata._parts);
-          console.log(response);
+        .then(function (response) {
+          Alert.alert(
+            'Report Sent',
+            'Your report is pending and will be reviewed.',
+          );
+          navigation.push('showReports');
         })
-        .catch(e => {
-          console.log(e);
+        .catch(function (error) {
+          console.log(error);
         });
     }
   };
@@ -100,6 +114,7 @@ function AddReports() {
       storageOptions: {
         saveToPhotos: true,
         mediaType: 'photo',
+        path: 'images',
       },
     };
     launchCamera(options, response => {
@@ -111,26 +126,11 @@ function AddReports() {
         console.log('User tapped custom button: ', response.customButton);
         alert(response.customButton);
       } else {
-        setImgReportUri(
-          'file:///' + response.assets[0].uri.split('file:/').join(''),
-        );
-        setPhoto(response.assets[0]);
+        setPhoto(response);
+        console.log(photo);
         setImgReportType(response.assets[0].type);
-
-        //formdata.append('image', {
-        //  uri: response.assets[0].uri,
-        //  name: full_name + loc_lat + loc_lng,
-        //  type: response.assets[0].type,
-        //});
-        //formdata.append('user_id', user_id);
-        //formdata.append('full_name', full_name);
-        //formdata.append('title', title);
-        //formdata.append('description', description);
-        //formdata.append('status', status);
-        //formdata.append('loc_lat', loc_lat);
-        //formdata.append('loc_lng', loc_lng);
-        //formdata.append('loc_img', loc_img);
-        console.log(formdata._parts[0]);
+        setImgReportUri(response.assets[0].uri);
+        setImgReportName(response.assets[0].fileName);
       }
     });
   };
@@ -204,7 +204,7 @@ function AddReports() {
             reports for several days!
           </Text>
         </View>
-        <View style={{flex: 1.8}}>
+        <View style={{flex: 2}}>
           <View
             style={{
               marginTop: 15,
@@ -235,7 +235,7 @@ function AddReports() {
               marginHorizontal: 20,
             }}>
             <Text style={{fontSize: 15, fontWeight: 'bold', color: 'black'}}>
-              Description:{' '}
+              Desc:{' '}
             </Text>
             <TextInput
               multiline={true}
@@ -275,7 +275,7 @@ function AddReports() {
                 marginHorizontal: 10,
               }}>
               <Image
-                source={{uri: loc_img}}
+                source={{uri: loc_imgUri}}
                 style={{flex: 1, height: 100, width: 100, alignSelf: 'center'}}
               />
             </View>
@@ -287,6 +287,18 @@ function AddReports() {
           </TouchableOpacity>
         </View>
       </View>
+      {isLoading ? (
+        <Modal
+          transparent={false}
+          visible={modalVisible}
+          onRequestClose={() => {
+            setModalVisible(!setModalVisible);
+          }}>
+          <ActivityIndicator size="large"></ActivityIndicator>
+        </Modal>
+      ) : (
+        <View></View>
+      )}
     </SafeAreaView>
   );
 }
