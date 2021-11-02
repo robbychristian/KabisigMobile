@@ -36,6 +36,7 @@ function Reports() {
   const [isLoading, setLoading] = useState(true);
   const [data, setData] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
+  const isBlocked = user.isBlocked;
   //const [refreshing, setRefreshing] = useState(false);
   //const [itemState, setItemState] = useState(data);
 
@@ -80,7 +81,7 @@ function Reports() {
 
   const getData = () => {
     //data.isFetching = false;
-    fetch('https://kabisigapp.com/api/fetchreport/' + user.id)
+    fetch('https://kabisigapp.com/api/fetchreport/' + user.id + '/' + user.brgy)
       .then(response => response.json())
       .then(json => {
         setData(json);
@@ -127,13 +128,28 @@ function Reports() {
               }}>
               <Text style={styles.reportTitle}>History of Reports</Text>
             </View>
-            <TouchableOpacity
-              style={styles.reportBtn}
-              onPress={() => navigation.navigate('AddReport')}>
-              <Text style={{color: '#FFF', fontSize: 20, fontWeight: 'bold'}}>
-                Send Report
-              </Text>
-            </TouchableOpacity>
+            {isBlocked ? (
+              <TouchableOpacity
+                style={styles.reportBtn}
+                onPress={() =>
+                  Alert.alert(
+                    'Blocked!',
+                    'You have been blocked from sending reports due to false information.',
+                  )
+                }>
+                <Text style={{color: '#FFF', fontSize: 20, fontWeight: 'bold'}}>
+                  Send Report
+                </Text>
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity
+                style={styles.reportBtn}
+                onPress={() => navigation.navigate('AddReport')}>
+                <Text style={{color: '#FFF', fontSize: 20, fontWeight: 'bold'}}>
+                  Send Report
+                </Text>
+              </TouchableOpacity>
+            )}
           </View>
           <View style={styles.flatListContainer}>
             <FlatList
@@ -146,12 +162,24 @@ function Reports() {
               renderItem={({item, index}) => (
                 <View style={styles.content}>
                   <View style={{flex: 2}}>
-                    <Text style={styles.reportImg}> {item.img_loc} </Text>
+                    <Image
+                      source={{
+                        uri:
+                          'https://kabisigapp.com/KabisigGit/storage/app/public/report_imgs/' +
+                          user.id +
+                          '/' +
+                          item.loc_img,
+                      }}
+                      style={{
+                        flex: 1,
+                        width: undefined,
+                        height: undefined,
+                      }}
+                    />
                   </View>
                   <View style={{flex: 10}}>
                     <Text style={styles.reportHeading}> {item.title} </Text>
                     <Text style={styles.reportDesc}> {item.description} </Text>
-                    <Text style={styles.reportStatus}> {item.id} </Text>
                   </View>
                   <TouchableOpacity
                     style={{flex: 1}}
@@ -210,9 +238,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderBottomColor: '#ececec',
     borderBottomWidth: 2,
-    borderRightColor: '#004F91',
-    borderRightWidth: 10,
-    padding: 10,
+    borderLeftColor: '#004F91',
+    borderLeftWidth: 8,
+    //padding: 10,
+    height: 90,
   },
   reportImg: {},
   reportHeading: {

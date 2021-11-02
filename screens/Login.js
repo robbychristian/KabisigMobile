@@ -18,6 +18,7 @@ import {useNavigation} from '@react-navigation/native';
 import {CommonActions} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import {UserContext} from '../provider/UserProvider';
+import axios from 'axios';
 
 function LoginScreen() {
   const user = useContext(UserContext);
@@ -25,32 +26,47 @@ function LoginScreen() {
   const [email, onChangeEmail] = useState(null);
   const [pass, onChangePass] = useState(null);
   const [isLoading, setLoading] = useState(true);
-
+  const formdata = new FormData();
+  const formfetch = new FormData();
   const _onPressButtonGET = function () {
     if (email != '' || pass != '') {
-      fetch('https://kabisigapp.com/api/logincreds/' + email + '/' + pass, {
-        method: 'GET',
+      formdata.append('email', email);
+      formdata.append('pass', pass);
+      axios({
+        url: 'https://kabisigapp.com/api/logincreds',
+        method: 'POST',
+        data: formdata,
+        headers: {
+          Accept: 'application/form-data',
+          'Content-Type': 'multipart/form-data',
+        },
       })
-        .then(response => response.json())
-        .then(responseData => {
-          if (responseData == 1) {
-            fetch('https://kabisigapp.com/api/fetch/' + email, {
-              method: 'GET',
+        .then(function (response) {
+          if (response.data == 1) {
+            formfetch.append('email', email);
+            axios({
+              url: 'https://kabisigapp.com/api/fetch',
+              method: 'POST',
+              data: formfetch,
+              headers: {
+                Accept: 'application/form-data',
+                'Content-Type': 'multipart/form-data',
+              },
             })
-              .then(response => response.json())
-              .then(responseData => {
-                if (responseData[0].email_verified_at != null) {
-                  user.id = responseData[0].id;
-                  user.fname = responseData[0].first_name;
-                  user.mname = responseData[0].middle_name;
-                  user.lname = responseData[0].last_name;
-                  user.brgy = responseData[0].brgy_loc;
-                  user.email = responseData[0].email;
-                  user.pass = responseData[0].password;
-                  user.profilePic = responseData[0].profile_pic;
-                  user.contactNo = responseData[0].contact_no;
-                  user.isBlocked = responseData[0].is_blocked;
-                  user.homeAdd = responseData[0].home_add;
+              .then(function (response) {
+                if (response.data[0].email_verified_at != null) {
+                  user.id = response.data[0].id;
+                  user.fname = response.data[0].first_name;
+                  user.mname = response.data[0].middle_name;
+                  user.lname = response.data[0].last_name;
+                  user.brgy = response.data[0].brgy_loc;
+                  user.email = response.data[0].email;
+                  user.pass = response.data[0].password;
+                  user.profilePic = response.data[0].profile_pic;
+                  user.contactNo = response.data[0].contact_no;
+                  user.homeAdd = response.data[0].home_address;
+                  user.isBlocked = response.data[0].is_blocked;
+                  user.homeAdd = response.data[0].home_add;
                   navigation.reset({
                     index: 0,
                     routes: [
@@ -59,27 +75,79 @@ function LoginScreen() {
                       },
                     ],
                   });
-                } else if (responseData[0].is_deactivated == 1) {
+                } else if (response.data[0].is_deactivated == 1) {
                   Alert.alert(
-                    'Login Failed',
-                    'It seems like your account has been deactivated.',
+                    'Deactivated account',
+                    'This account has been deactivated. Ask for the barangay official to activate the account.',
                   );
                 } else {
                   Alert.alert(
-                    'Login Failed',
-                    'Make sure that your email is verified!',
+                    'Verify Email',
+                    'Verify your email before logging in!',
                   );
                 }
+              })
+              .catch(function (error) {
+                console.log(error);
               });
           }
         })
-        .catch(e => {
-          Alert.alert(
-            'Invalid Credentials',
-            'Credentials does not match anything in the record.',
-          );
-        })
-        .done();
+        .catch(function (error) {
+          console.log(error);
+        });
+      // fetch('https://kabisigapp.com/api/logincreds/' + email + '/' + pass, {
+      //   method: 'GET',
+      // })
+      //   .then(response => response.json())
+      //   .then(responseData => {
+      //     if (responseData == 1) {
+      //       fetch('https://kabisigapp.com/api/fetch/' + email, {
+      //         method: 'GET',
+      //       })
+      //         .then(response => response.json())
+      //         .then(responseData => {
+      //           if (responseData[0].email_verified_at != null) {
+      //             user.id = responseData[0].id;
+      //             user.fname = responseData[0].first_name;
+      //             user.mname = responseData[0].middle_name;
+      //             user.lname = responseData[0].last_name;
+      //             user.brgy = responseData[0].brgy_loc;
+      //             user.email = responseData[0].email;
+      //             user.pass = responseData[0].password;
+      //             user.profilePic = responseData[0].profile_pic;
+      //             user.contactNo = responseData[0].contact_no;
+      //             user.homeAdd = responseData[0].home_address;
+      //             user.isBlocked = responseData[0].is_blocked;
+      //             user.homeAdd = responseData[0].home_add;
+      //             navigation.reset({
+      //               index: 0,
+      //               routes: [
+      //                 {
+      //                   name: 'HomeLogin',
+      //                 },
+      //               ],
+      //             });
+      //           } else if (responseData[0].is_deactivated == 1) {
+      //             Alert.alert(
+      //               'Login Failed',
+      //               'It seems like your account has been deactivated.',
+      //             );
+      //           } else {
+      //             Alert.alert(
+      //               'Login Failed',
+      //               'Make sure that your email is verified!',
+      //             );
+      //           }
+      //         });
+      //     }
+      //   })
+      //   .catch(e => {
+      //     Alert.alert(
+      //       'Invalid Credentials',
+      //       'Credentials does not match anything in the record.',
+      //     );
+      //   })
+      //   .done();
     } else {
       Alert.alert(
         'Field(s) are empty!',

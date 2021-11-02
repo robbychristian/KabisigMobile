@@ -34,7 +34,8 @@ function AddReports() {
   const context = useContext(UserContext);
   const user_id = context.id;
   const full_name = context.fname + ' ' + context.mname + ' ' + context.lname;
-  const status = 'Report Pending';
+  const status = 'Not Confirmed';
+  const brgyLoc = context.brgy;
   const [title, setReportTitle] = useState('');
   const [description, setReportDesc] = useState('');
   const [loc_imgUri, setImgReportUri] = useState('no_Image.jpg');
@@ -68,6 +69,7 @@ function AddReports() {
       formdata.append('full_name', full_name);
       formdata.append('title', title);
       formdata.append('description', description);
+      formdata.append('brgy_loc', brgyLoc);
       formdata.append('status', status);
       formdata.append('loc_lat', loc_lat);
       formdata.append('loc_lng', loc_lng);
@@ -280,25 +282,21 @@ function AddReports() {
               />
             </View>
           </View>
-          <TouchableOpacity style={styles.submitBtn} onPress={submit}>
-            <Text style={{fontSize: 15, fontWeight: 'bold', color: 'white'}}>
-              Submit
-            </Text>
-          </TouchableOpacity>
+          {isLoading ? (
+            <TouchableOpacity style={styles.submitBtnGray} onPress={submit}>
+              <Text style={{fontSize: 15, fontWeight: 'bold', color: 'white'}}>
+                Submit
+              </Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity style={styles.submitBtn} onPress={submit}>
+              <Text style={{fontSize: 15, fontWeight: 'bold', color: 'white'}}>
+                Submit
+              </Text>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
-      {isLoading ? (
-        <Modal
-          transparent={false}
-          visible={modalVisible}
-          onRequestClose={() => {
-            setModalVisible(!setModalVisible);
-          }}>
-          <ActivityIndicator size="large"></ActivityIndicator>
-        </Modal>
-      ) : (
-        <View></View>
-      )}
     </SafeAreaView>
   );
 }
@@ -347,6 +345,18 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     height: '100%',
     marginHorizontal: 20,
+  },
+  submitBtnGray: {
+    borderColor: '#202020',
+    borderWidth: 1,
+    backgroundColor: '#004F91',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flex: 1,
+    marginTop: -80,
+    marginBottom: 20,
+    width: '35%',
+    alignSelf: 'center',
   },
   submitBtn: {
     borderColor: '#004F91',

@@ -23,6 +23,12 @@ import Announcements from './screens/Features/Announcements';
 //Reports
 import Reports from './screens/Features/Reports/Reports';
 import AddReports from './screens/Features/Reports/AddReports';
+//Vulnerability Map
+import VulnerabilityMap from './screens/Features/VulnerabilityMap';
+//Evacuation Center
+import EvacuationCenter from './screens/Features/EvacuationCenter';
+//Edit Profile
+import EditProfile from './screens/Features/EditProfile';
 
 function HomeScreen() {
   return <Protocols />;
@@ -30,6 +36,18 @@ function HomeScreen() {
 
 function AnnouncementScreen() {
   return <Announcements />;
+}
+
+function VulnerabilityMapScreen() {
+  return <VulnerabilityMap />;
+}
+
+function EditProfileScreen() {
+  return <EditProfile />;
+}
+
+function EvacuationCenterScreen() {
+  return <EvacuationCenter />;
 }
 
 function ReportScreen() {
@@ -104,6 +122,15 @@ const DrawerStackScreen = () => {
       <Drawer.Screen name="Announcement" component={AnnouncementScreen} />
       <Drawer.Screen name="Guidelines" component={ProtocolStackScreen} />
       <Drawer.Screen name="Reports" component={ReportStackScreen} />
+      <Drawer.Screen
+        name="Vulnerability Map"
+        component={VulnerabilityMapScreen}
+      />
+      <Drawer.Screen
+        name="Evacuation Center"
+        component={EvacuationCenterScreen}
+      />
+      <Drawer.Screen name="Edit Profile" component={EditProfileScreen} />
     </Drawer.Navigator>
   );
 };
