@@ -76,24 +76,28 @@ const FirstRegisterScreen = () => {
       <View style={styles.formContainer}>
         <TextInput
           style={styles.formInput}
+          placeholderTextColor="gray"
           returnKeyType="next"
           onChangeText={setFname}
           placeholder="First Name"
         />
         <TextInput
           style={styles.formInput}
+          placeholderTextColor="gray"
           returnKeyType="next"
           onChangeText={setMname}
           placeholder="Middle Name"
         />
         <TextInput
           style={styles.formInput}
+          placeholderTextColor="gray"
           returnKeyType="next"
           onChangeText={setLname}
           placeholder="Last Name"
         />
         <TextInput
           style={styles.formInput}
+          placeholderTextColor="gray"
           returnKeyType="next"
           onChangeText={setEmail}
           placeholder="Email"
@@ -101,6 +105,7 @@ const FirstRegisterScreen = () => {
         />
         <TextInput
           style={styles.formInput}
+          placeholderTextColor="gray"
           returnKeyType="next"
           onChangeText={setPass}
           placeholder="Password"
@@ -108,6 +113,7 @@ const FirstRegisterScreen = () => {
         />
         <TextInput
           style={styles.formInput}
+          placeholderTextColor="gray"
           returnKeyType="next"
           onChangeText={setConfPass}
           placeholder="Confirm Password"
@@ -148,6 +154,7 @@ const styles = StyleSheet.create({
     marginTop: 15,
     width: '80%',
     fontSize: 20,
+    color: '#000',
   },
   nextBtn: {
     backgroundColor: '#007ADE',

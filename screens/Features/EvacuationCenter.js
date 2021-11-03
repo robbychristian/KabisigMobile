@@ -41,6 +41,16 @@ function EvacuationCenter() {
     longitudeDelta: 0.015,
   });
   const mapView = useRef(null);
+
+  const animate = () => {
+    let r = {
+      latitude: 42.5,
+      longitude: 15.2,
+      latitudeDelta: 7.5,
+      longitudeDelta: 7.5,
+    };
+    mapView.animateToRegion(r, 2000);
+  };
   useEffect(() => {
     fetch('https://kabisigapp.com/api/evacuationcenters')
       .then(response => response.json())
@@ -54,40 +64,37 @@ function EvacuationCenter() {
   }, []);
   return (
     <SafeAreaView>
-      <View style={styles.container}>
-        <MapView
-          //provider={PROVIDER_GOOGLE}
-          style={styles.map}
-          region={region}
-          ref={mapView}
-          onRegionChangeComplete={region => setRegion(region)}>
-          {location.map((data, index) => {
-            return (
-              <Marker
-                key={index}
-                coordinate={{
-                  latitude: parseFloat(data.lat),
-                  longitude: parseFloat(data.lng),
-                }}
-              />
-            );
-          })}
-        </MapView>
-      </View>
+      <MapView
+        ref={mapView}
+        initialRegion={region}
+        style={styles.container}
+        onPress={() => {
+          console.log('test');
+        }}>
+        {location.map((data, index) => {
+          return (
+            <Marker
+              key={index}
+              coordinate={{
+                latitude: parseFloat(data.lat),
+                longitude: parseFloat(data.lng),
+              }}
+            />
+          );
+        })}
+      </MapView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    ...StyleSheet.absoluteFillObject,
+    //...StyleSheet.absoluteFillObject,
     height: Dimensions.get('window').height,
     width: Dimensions.get('window').width,
-    justifyContent: 'flex-end',
-    alignItems: 'center',
   },
   map: {
-    ...StyleSheet.absoluteFillObject,
+    //...StyleSheet.absoluteFillObject,
   },
 });
 
