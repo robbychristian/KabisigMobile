@@ -8,6 +8,8 @@ import {
   StyleSheet,
   KeyboardAvoidingView,
   Alert,
+  Modal,
+  ActivityIndicator,
 } from 'react-native';
 import {
   createNativeStackNavigator,
@@ -25,13 +27,14 @@ function LoginScreen() {
   const navigation = useNavigation();
   const [email, onChangeEmail] = useState(null);
   const [pass, onChangePass] = useState(null);
-  const [isLoading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const formdata = new FormData();
   const formfetch = new FormData();
   const _onPressButtonGET = function () {
     if (email != '' || pass != '') {
       formdata.append('email', email);
       formdata.append('pass', pass);
+      setLoading(true);
       axios({
         url: 'https://kabisigapp.com/api/logincreds',
         method: 'POST',
@@ -54,6 +57,7 @@ function LoginScreen() {
               },
             })
               .then(function (response) {
+                setLoading(false);
                 if (response.data[0].email_verified_at != null) {
                   user.id = response.data[0].id;
                   user.fname = response.data[0].first_name;
@@ -95,59 +99,6 @@ function LoginScreen() {
         .catch(function (error) {
           console.log(error);
         });
-      // fetch('https://kabisigapp.com/api/logincreds/' + email + '/' + pass, {
-      //   method: 'GET',
-      // })
-      //   .then(response => response.json())
-      //   .then(responseData => {
-      //     if (responseData == 1) {
-      //       fetch('https://kabisigapp.com/api/fetch/' + email, {
-      //         method: 'GET',
-      //       })
-      //         .then(response => response.json())
-      //         .then(responseData => {
-      //           if (responseData[0].email_verified_at != null) {
-      //             user.id = responseData[0].id;
-      //             user.fname = responseData[0].first_name;
-      //             user.mname = responseData[0].middle_name;
-      //             user.lname = responseData[0].last_name;
-      //             user.brgy = responseData[0].brgy_loc;
-      //             user.email = responseData[0].email;
-      //             user.pass = responseData[0].password;
-      //             user.profilePic = responseData[0].profile_pic;
-      //             user.contactNo = responseData[0].contact_no;
-      //             user.homeAdd = responseData[0].home_address;
-      //             user.isBlocked = responseData[0].is_blocked;
-      //             user.homeAdd = responseData[0].home_add;
-      //             navigation.reset({
-      //               index: 0,
-      //               routes: [
-      //                 {
-      //                   name: 'HomeLogin',
-      //                 },
-      //               ],
-      //             });
-      //           } else if (responseData[0].is_deactivated == 1) {
-      //             Alert.alert(
-      //               'Login Failed',
-      //               'It seems like your account has been deactivated.',
-      //             );
-      //           } else {
-      //             Alert.alert(
-      //               'Login Failed',
-      //               'Make sure that your email is verified!',
-      //             );
-      //           }
-      //         });
-      //     }
-      //   })
-      //   .catch(e => {
-      //     Alert.alert(
-      //       'Invalid Credentials',
-      //       'Credentials does not match anything in the record.',
-      //     );
-      //   })
-      //   .done();
     } else {
       Alert.alert(
         'Field(s) are empty!',
@@ -158,6 +109,13 @@ function LoginScreen() {
 
   return (
     <KeyboardAvoidingView style={styles.background}>
+      <Modal transparent={true} visible={loading}>
+        <View style={styles.modalBackground}>
+          <View style={styles.activityIndicatorWrapper}>
+            <ActivityIndicator animating={loading} color="blue" />
+          </View>
+        </View>
+      </Modal>
       <View style={styles.logo}>
         <Image source={require('../assets/kabisig_blue.png')} />
         <Text style={styles.logoText}>Login Your Account</Text>
@@ -166,6 +124,8 @@ function LoginScreen() {
         <TextInput
           style={styles.formInput}
           onChangeText={onChangeEmail}
+          textContentType="emailAddress"
+          keyboardType="email-address"
           placeholderTextColor="#808080"
           placeholder="Email"></TextInput>
         <TextInput
@@ -224,6 +184,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     height: '10%',
+  },
+  modalBackground: {
+    flex: 1,
+    alignItems: 'center',
+    flexDirection: 'column',
+    justifyContent: 'space-around',
+    backgroundColor: '#00000040',
+  },
+  activityIndicatorWrapper: {
+    backgroundColor: '#FFFFFF',
+    height: 50,
+    width: 50,
+    borderRadius: 10,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-around',
   },
 });
 

@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useContext} from 'react';
 import {
   View,
   Image,
@@ -8,6 +8,8 @@ import {
   StyleSheet,
   KeyboardAvoidingView,
   Alert,
+  ActivityIndicator,
+  RefreshControl,
   FlatList,
 } from 'react-native';
 import {
@@ -15,57 +17,84 @@ import {
   Header,
 } from '@react-navigation/native-stack';
 import {NavigationContainer} from '@react-navigation/native';
+import {UserContext} from '../../provider/UserProvider';
 import {useNavigation} from '@react-navigation/native';
 import {CommonActions} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {format, formatDistance, formatRelative, subDays} from 'date-fns';
 import {Dimensions} from 'react-native';
+import axios from 'axios';
 
 import {useRoute} from '@react-navigation/native';
 
 var width = Dimensions.get('window').width; //full width
 function Announcements() {
+  const navigation = useNavigation();
+  const context = useContext(UserContext);
+  const brgy = context.brgy;
   const [isLoading, setLoading] = useState(true);
   const [data, setData] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
   useEffect(() => {
-    fetch('https://kabisigapp.com/api/announcements')
-      .then(response => response.json())
-      .then(json => {
-        setData(json);
-      })
-      .catch(error => {
-        Alert.alert('Error', 'There is an error fetching announcements.');
-      })
-      .finally(() => setLoading(false));
+    getData();
   }, []);
+
+  const getData = () => {
+    axios({
+      url: 'https://kabisigapp.com/api/announcements/' + brgy,
+      method: 'GET',
+    })
+      .then(function (response) {
+        setData(response.data);
+        setRefreshing(false);
+        setLoading(false);
+      })
+      .catch(function (e) {
+        console.log(e);
+      });
+  };
+
+  const onRefresh = () => {
+    setData([]);
+    getData();
+  };
 
   return (
     <SafeAreaView style={styles.container}>
       {isLoading ? (
-        <Text>Loading...</Text>
+        <ActivityIndicator size="large" />
       ) : (
         <View>
           <FlatList
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            }
+            nestedScrollEnabled
             data={data}
             keyExtractor={({id}, index) => id}
             renderItem={({item}) => (
-              <View style={styles.content}>
-                <Icon
-                  name="bullhorn"
-                  color="#004F91"
-                  size={25}
-                  style={{paddingLeft: 15}}></Icon>
-                <View style={styles.announceContainer}>
-                  <Text style={styles.announceTextTitle}>{item.title}</Text>
-                  <Text style={styles.announcedate}>
-                    Posted at:{' '}
-                    {format(
-                      new Date(item.created_at),
-                      'EEEE, MMMM d, y, h:mm:ss a',
-                    )}
-                  </Text>
-                </View>
+              <View>
+                <TouchableOpacity
+                  style={styles.content}
+                  onPress={() => {
+                    navigation.push('Individual Announcement', {
+                      title: item.title,
+                      body: item.body,
+                      name: item.name,
+                      timestamp: item.created_at,
+                    });
+                  }}>
+                  <Icon
+                    name="bullhorn"
+                    color="#004F91"
+                    size={25}
+                    style={{paddingLeft: 15}}></Icon>
+                  <View style={styles.announceContainer}>
+                    <Text style={styles.announceTextTitle}>{item.title}</Text>
+                    <Text style={styles.announcedate}>{item.created_at}</Text>
+                  </View>
+                </TouchableOpacity>
               </View>
             )}
           />
@@ -74,6 +103,10 @@ function Announcements() {
     </SafeAreaView>
   );
 }
+
+const component = () => {
+  //Posted at:{' '}
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -89,10 +122,11 @@ const styles = StyleSheet.create({
   },
   announceContainer: {
     backgroundColor: '#fff',
+    flex: 1,
   },
   announceTextTitle: {
     color: '#333333',
-    fontSize: 25,
+    fontSize: 20,
     fontWeight: 'bold',
     paddingRight: 15,
     paddingTop: 15,

@@ -18,6 +18,7 @@ import {NavigationContainer} from '@react-navigation/native';
 import {useNavigation} from '@react-navigation/native';
 import {CommonActions} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import {UserContext} from '../../provider/UserProvider';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {format, formatDistance, formatRelative, subDays} from 'date-fns';
 import {Dimensions} from 'react-native';
@@ -30,10 +31,13 @@ import MapView, {
   TYPE_MAPS,
   Callout,
 } from 'react-native-maps';
+import axios from 'axios';
 
 function EvacuationCenter() {
   const [location, setLocation] = useState([]);
   const [isLoading, setLoading] = useState(true);
+  const context = useContext(UserContext);
+  const brgy = context.brgy;
   const [region, setRegion] = useState({
     longitude: 121.085039,
     latitude: 14.615522,
@@ -52,15 +56,16 @@ function EvacuationCenter() {
     mapView.animateToRegion(r, 2000);
   };
   useEffect(() => {
-    fetch('https://kabisigapp.com/api/evacuationcenters')
-      .then(response => response.json())
-      .then(json => {
-        setLocation(json);
+    axios({
+      url: 'https://kabisigapp.com/api/evacuationcenters/' + brgy,
+      method: 'GET',
+    })
+      .then(function (response) {
+        setLocation(response.data);
       })
-      .catch(error => {
-        Alert.alert('Error', 'There is an error fetching data.');
-      })
-      .finally(() => setLoading(false));
+      .catch(function (e) {
+        console.log(e);
+      });
   }, []);
   return (
     <SafeAreaView>

@@ -1,15 +1,22 @@
 // In App.js in a new project
 
 import * as React from 'react';
-import {View, Text} from 'react-native';
+import {View, Text, Alert} from 'react-native';
+import Icon from 'react-native-vector-icons/FontAwesome5';
 import {UserContext, UserProvider} from './provider/UserProvider';
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import {createDrawerNavigator} from '@react-navigation/drawer';
+import {
+  createDrawerNavigator,
+  DrawerContentScrollView,
+  DrawerItemList,
+  DrawerItem,
+} from '@react-navigation/drawer';
 import {Header, HeaderTitleAlign} from '@react-navigation/elements';
 import Welcome from './screens/Welcome';
 import Login from './screens/Login';
 import {useRoute} from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
 import FirstRegister from './screens/FirstRegister';
 import SecondRegister from './screens/SecondRegister';
 //GUIDELINES
@@ -20,6 +27,7 @@ import TropicalCyclone from './screens/Protocols/TropicalCyclone';
 import Tsunami from './screens/Protocols/Tsunami';
 //Announcements
 import Announcements from './screens/Features/Announcements';
+import IndividualAnnouncement from './screens/Features/IndividualAnnouncement';
 //Reports
 import Reports from './screens/Features/Reports/Reports';
 import AddReports from './screens/Features/Reports/AddReports';
@@ -36,6 +44,10 @@ function HomeScreen() {
 
 function AnnouncementScreen() {
   return <Announcements />;
+}
+
+function IndividualAnnouncementScreen() {
+  return <IndividualAnnouncement />;
 }
 
 function VulnerabilityMapScreen() {
@@ -87,8 +99,40 @@ function SecondRegisterScreen() {
   return <SecondRegister />;
 }
 
+function Logout(props) {
+  const navigation = useNavigation();
+  return (
+    <DrawerContentScrollView {...props}>
+      <DrawerItemList {...props} />
+      <DrawerItem
+        label="Logout"
+        icon={({color, size}) => (
+          <Icon name="door-open" size={size} color={color} />
+        )}
+        style={{
+          borderTopColor: '#000',
+          borderTopWidth: 1,
+          marginTop: 30,
+          paddingTop: 15,
+        }}
+        onPress={() =>
+          navigation.reset({
+            index: 0,
+            routes: [
+              {
+                name: 'Welcome',
+              },
+            ],
+          })
+        }
+      />
+    </DrawerContentScrollView>
+  );
+}
+
 const ProtocolStack = createNativeStackNavigator();
 const HomeStack = createNativeStackNavigator();
+const AnnouncementStack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
 const ReportStack = createNativeStackNavigator();
 
@@ -107,6 +151,21 @@ const ProtocolStackScreen = () => {
   );
 };
 
+const AnnouncementStackScreen = () => {
+  return (
+    <AnnouncementStack.Navigator screenOptions={{headerShown: false}}>
+      <AnnouncementStack.Screen
+        name="Announcements"
+        component={AnnouncementScreen}
+      />
+      <AnnouncementStack.Screen
+        name="Individual Announcement"
+        component={IndividualAnnouncementScreen}
+      />
+    </AnnouncementStack.Navigator>
+  );
+};
+
 const ReportStackScreen = () => {
   return (
     <ReportStack.Navigator screenOptions={{headerShown: false}}>
@@ -117,20 +176,63 @@ const ReportStackScreen = () => {
 };
 
 const DrawerStackScreen = () => {
+  const navigation = useNavigation();
   return (
-    <Drawer.Navigator>
-      <Drawer.Screen name="Announcement" component={AnnouncementScreen} />
-      <Drawer.Screen name="Guidelines" component={ProtocolStackScreen} />
-      <Drawer.Screen name="Reports" component={ReportStackScreen} />
+    <Drawer.Navigator drawerContent={props => <Logout {...props} />}>
       <Drawer.Screen
+        options={{
+          drawerIcon: ({color, size}) => (
+            <Icon name="user-edit" size={size} color={color} />
+          ),
+        }}
+        name="Edit Profile"
+        component={EditProfileScreen}
+      />
+      <Drawer.Screen
+        options={{
+          drawerIcon: ({color, size}) => (
+            <Icon name="bullhorn" size={size} color={color} />
+          ),
+        }}
+        name="Announcement"
+        component={AnnouncementStackScreen}
+      />
+      <Drawer.Screen
+        options={{
+          drawerIcon: ({color, size}) => (
+            <Icon name="list" size={size} color={color} />
+          ),
+        }}
+        name="Guidelines"
+        component={ProtocolStackScreen}
+      />
+      <Drawer.Screen
+        options={{
+          drawerIcon: ({color, size}) => (
+            <Icon name="pen-square" size={size} color={color} />
+          ),
+        }}
+        name="Reports"
+        component={ReportStackScreen}
+      />
+      <Drawer.Screen
+        options={{
+          drawerIcon: ({color, size}) => (
+            <Icon name="map-marked-alt" size={size} color={color} />
+          ),
+        }}
         name="Vulnerability Map"
         component={VulnerabilityMapScreen}
       />
       <Drawer.Screen
+        options={{
+          drawerIcon: ({color, size}) => (
+            <Icon name="map-pin" size={size} color={color} />
+          ),
+        }}
         name="Evacuation Center"
         component={EvacuationCenterScreen}
       />
-      <Drawer.Screen name="Edit Profile" component={EditProfileScreen} />
     </Drawer.Navigator>
   );
 };

@@ -44,8 +44,8 @@ function AddReports() {
   const [photo, setPhoto] = useState();
   const [loc_lat, setLocLatitude] = useState('');
   const [loc_lng, setLocLongitude] = useState('');
-  const [modalVisible, setModalVisible] = useState(true);
-  const [isLoading, setLoading] = useState(false);
+
+  const [loading, setLoading] = useState(false);
   const {validate, isFieldInError, getErrorsInField, getErrorMessages} =
     useValidation({
       state: {title, description, loc_lat, loc_lng},
@@ -59,6 +59,7 @@ function AddReports() {
       //  name: full_name + loc_lat + loc_lng,
       //  type: imgReportType,
       //});
+      setLoading(true);
       let file = {
         uri: loc_imgUri,
         type: 'multipart/form-data',
@@ -84,11 +85,12 @@ function AddReports() {
         },
       })
         .then(function (response) {
+          setLoading(false);
           Alert.alert(
             'Report Sent',
             'Your report is pending and will be reviewed.',
           );
-          navigation.push('showReports');
+          navigation.navigate('ShowReports');
         })
         .catch(function (error) {
           console.log(error);
@@ -140,6 +142,13 @@ function AddReports() {
   const navigation = useNavigation();
   return (
     <SafeAreaView style={styles.container}>
+      <Modal transparent={true} visible={loading}>
+        <View style={styles.modalBackground}>
+          <View style={styles.activityIndicatorWrapper}>
+            <ActivityIndicator animating={loading} color="blue" />
+          </View>
+        </View>
+      </Modal>
       <View style={{flex: 1.5}}>
         <TouchableOpacity
           style={styles.backBtn}
@@ -282,19 +291,11 @@ function AddReports() {
               />
             </View>
           </View>
-          {isLoading ? (
-            <TouchableOpacity style={styles.submitBtnGray} onPress={submit}>
-              <Text style={{fontSize: 15, fontWeight: 'bold', color: 'white'}}>
-                Submit
-              </Text>
-            </TouchableOpacity>
-          ) : (
-            <TouchableOpacity style={styles.submitBtn} onPress={submit}>
-              <Text style={{fontSize: 15, fontWeight: 'bold', color: 'white'}}>
-                Submit
-              </Text>
-            </TouchableOpacity>
-          )}
+          <TouchableOpacity style={styles.submitBtnGray} onPress={submit}>
+            <Text style={{fontSize: 15, fontWeight: 'bold', color: 'white'}}>
+              Submit
+            </Text>
+          </TouchableOpacity>
         </View>
       </View>
     </SafeAreaView>

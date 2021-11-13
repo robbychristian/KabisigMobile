@@ -137,7 +137,12 @@ function Reports() {
                     'You have been blocked from sending reports due to false information.',
                   )
                 }>
-                <Text style={{color: '#FFF', fontSize: 20, fontWeight: 'bold'}}>
+                <Text
+                  style={{
+                    color: '#FFF',
+                    fontSize: 20,
+                    fontWeight: 'bold',
+                  }}>
                   Send Report
                 </Text>
               </TouchableOpacity>
@@ -228,6 +233,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     alignSelf: 'center',
+    padding: 7,
   },
   flatListContainer: {
     flex: 10,

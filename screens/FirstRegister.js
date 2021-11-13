@@ -55,6 +55,7 @@ const FirstRegisterScreen = () => {
         lname: lname,
         email: email,
         pass: pass,
+        cpass: confPass,
       });
     } else {
       isFieldInError('email') &&
@@ -63,6 +64,22 @@ const FirstRegisterScreen = () => {
         });
       isFieldInError('confPass') &&
         getErrorsInField('confPass').map(e => {
+          Alert.alert('A field is not properly field', e);
+        });
+      isFieldInError('fname') &&
+        getErrorsInField('fname').map(e => {
+          Alert.alert('A field is not properly field', e);
+        });
+      isFieldInError('mname') &&
+        getErrorsInField('mname').map(e => {
+          Alert.alert('A field is not properly field', e);
+        });
+      isFieldInError('lname') &&
+        getErrorsInField('lname').map(e => {
+          Alert.alert('A field is not properly field', e);
+        });
+      isFieldInError('pass') &&
+        getErrorsInField('pass').map(e => {
           Alert.alert('A field is not properly field', e);
         });
     }

@@ -6,6 +6,8 @@ import {
   StyleSheet,
   Alert,
   TouchableOpacity,
+  Modal,
+  ActivityIndicator,
 } from 'react-native';
 import {Picker} from '@react-native-picker/picker';
 import {TextInput} from 'react-native-gesture-handler';
@@ -14,6 +16,9 @@ import {NavigationContainer} from '@react-navigation/native';
 import {useNavigation} from '@react-navigation/native';
 import {useRoute} from '@react-navigation/native';
 import {useValidation} from 'react-native-form-validator';
+import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
+import axios from 'axios';
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 const SecondRegisterScreen = () => {
   const navigation = useNavigation();
@@ -23,6 +28,12 @@ const SecondRegisterScreen = () => {
   const lname = route.params.lname;
   const email = route.params.email;
   const pass = route.params.pass;
+  const cpass = route.params.cpass;
+  const [loading, setLoading] = useState(false);
+  const [photo, setPhoto] = useState();
+  const [imgType, setImgType] = useState();
+  const [imgUri, setImgUri] = useState();
+  const [imgName, setImgName] = useState();
 
   const [home_add, sethome_add] = useState(null);
   const [brgy, setSelectedBrgy] = useState(null);
@@ -30,12 +41,37 @@ const SecondRegisterScreen = () => {
   const [dbday, setdbday] = useState(null);
   const [ybday, setybday] = useState(null);
   const [cnum, setcnum] = useState(null);
-
+  const formdata = new FormData();
   const {validate, isFieldInError, getErrorsInField, getErrorMessages} =
     useValidation({
       state: {brgy, mbday, dbday, ybday, cnum},
     });
 
+  const openCamera = () => {
+    const options = {
+      storageOptions: {
+        saveToPhotos: true,
+        mediaType: 'photo',
+        path: 'images',
+      },
+    };
+    launchCamera(options, response => {
+      if (response.didCancel) {
+        console.log('User cancelled image picker');
+      } else if (response.error) {
+        console.log('ImagePicker Error: ', response.error);
+      } else if (response.customButton) {
+        console.log('User tapped custom button: ', response.customButton);
+        alert(response.customButton);
+      } else {
+        setPhoto(response);
+        console.log(photo);
+        setImgType(response.assets[0].type);
+        setImgUri(response.assets[0].uri);
+        setImgName(response.assets[0].fileName);
+      }
+    });
+  };
   const submitForm = function () {
     if (
       home_add == null ||
@@ -61,28 +97,42 @@ const SecondRegisterScreen = () => {
         cnum: {required: true, minlength: 11, maxlength: 11},
       })
     ) {
-      const data = {
-        fname: fname,
-        mname: mname,
-        lname: lname,
-        email: email,
-        pass: pass,
-        home_add: home_add,
-        brgy: brgy,
-        mbday: mbday,
-        dbday: dbday,
-        ybday: ybday,
-        cnum: cnum,
+      setLoading(true);
+      let file = {
+        uri: imgUri,
+        type: 'multipart/form-data',
+        name: imgName,
       };
-      fetch('https://kabisigapp.com/api/register/' + data, {
+      formdata.append('file', file);
+      formdata.append('fname', fname);
+      formdata.append('mname', mname);
+      formdata.append('lname', lname);
+      formdata.append('home_add', home_add);
+      formdata.append('brgy', brgy);
+      formdata.append('mbday', mbday);
+      formdata.append('dbday', dbday);
+      formdata.append('ybday', ybday);
+      formdata.append('email', email);
+      formdata.append('cnum', cnum);
+      formdata.append('pass', pass);
+      formdata.append('cpass', cpass);
+      formdata.append('cbox', true);
+      axios({
+        url: 'https://kabisigapp.com/api/register',
         method: 'POST',
+        data: formdata,
+        headers: {
+          Accept: 'application/form-data',
+          'Content-Type': 'multipart/form-data',
+        },
       })
-        .then(response => response.json())
-        .then(responseData => {
-          console.log('responseData');
+        .then(function (response) {
+          Alert.alert('Success!', 'Account has been registered!');
+          setLoading(false);
+          navigation.navigate('Login');
         })
-        .catch(error => {
-          console.log(data.fname);
+        .catch(function (error) {
+          console.log(error);
         });
     } else {
       isFieldInError('cnum') &&
@@ -94,6 +144,13 @@ const SecondRegisterScreen = () => {
 
   return (
     <KeyboardAvoidingView style={styles.container}>
+      <Modal transparent={true} visible={loading}>
+        <View style={styles.modalBackground}>
+          <View style={styles.activityIndicatorWrapper}>
+            <ActivityIndicator animating={loading} color="blue" />
+          </View>
+        </View>
+      </Modal>
       <View style={styles.textContainer}>
         <Text style={styles.textStyle}>Profile Information</Text>
       </View>
@@ -103,21 +160,28 @@ const SecondRegisterScreen = () => {
           style={styles.formInput}
           returnKeyType="next"
           placeholder="Home Address"
+          placeholderTextColor="gray"
         />
         <TouchableOpacity style={styles.pickerContainer}>
           <Picker
-            style={{marginLeft: -13, fontSize: 20}}
+            style={{marginLeft: -13, fontSize: 20, color: 'black'}}
             selectedValue={brgy}
             itemStyle={{fontSize: 20}}
             onValueChange={setSelectedBrgy}>
             <Picker.Item label="Choose a barangay" value="" />
             <Picker.Item label="Barangay Santolan" value="Barangay Santolan" />
-            <Picker.Item label="Barangay Paz" value="Barangay Dela Paz" />
+            <Picker.Item label="Barangay Dela Paz" value="Barangay Dela Paz" />
+            <Picker.Item
+              label="Barangay Manggahan"
+              value="Barangay Manggahan"
+            />
+            <Picker.Item label="Barangay Maybunga" value="Barangay Maybunga" />
+            <Picker.Item label="Barangay Rosario" value="Barangay Rosario" />
           </Picker>
         </TouchableOpacity>
         <TouchableOpacity style={styles.pickerContainer}>
           <Picker
-            style={{marginLeft: -13, fontSize: 20}}
+            style={{marginLeft: -13, fontSize: 20, color: 'black'}}
             selectedValue={mbday}
             itemStyle={{fontSize: 20}}
             onValueChange={setmbday}>
@@ -138,7 +202,7 @@ const SecondRegisterScreen = () => {
         </TouchableOpacity>
         <TouchableOpacity style={styles.pickerContainer}>
           <Picker
-            style={{marginLeft: -13, fontSize: 20}}
+            style={{marginLeft: -13, fontSize: 20, color: '#000'}}
             selectedValue={dbday}
             itemStyle={{fontSize: 20}}
             onValueChange={setdbday}>
@@ -178,7 +242,7 @@ const SecondRegisterScreen = () => {
         </TouchableOpacity>
         <TouchableOpacity style={styles.pickerContainer}>
           <Picker
-            style={{marginLeft: -13, fontSize: 20}}
+            style={{marginLeft: -13, fontSize: 20, color: 'black'}}
             selectedValue={ybday}
             itemStyle={{fontSize: 20}}
             onValueChange={setybday}>
@@ -290,9 +354,31 @@ const SecondRegisterScreen = () => {
           style={styles.formInput}
           returnKeyType="next"
           placeholder="Contact Number"
+          placeholderTextColor="gray"
           keyboardType="number-pad"
           onChangeText={setcnum}
         />
+        <View
+          style={{
+            flex: 1,
+            borderWidth: 2,
+            borderColor: '#004F91',
+            height: '30%',
+            width: '80%',
+            justifyContent: 'center',
+            marginHorizontal: 10,
+            marginVertical: 20,
+            backgroundColor: '#004F91',
+          }}>
+          <TouchableOpacity
+            style={{alignItems: 'center', justifyContent: 'center'}}
+            onPress={openCamera}>
+            <Icon name="camera" color="#fff" size={40} />
+            <Text style={{fontSize: 15, fontWeight: 'bold', color: 'white'}}>
+              Take a photo
+            </Text>
+          </TouchableOpacity>
+        </View>
         <TouchableOpacity style={styles.nextBtn} onPress={submitForm}>
           <Text style={{color: '#FFF'}}>Submit</Text>
         </TouchableOpacity>
@@ -328,6 +414,7 @@ const styles = StyleSheet.create({
     marginTop: 15,
     width: '80%',
     fontSize: 20,
+    color: '#000',
   },
   pickerContainer: {
     borderBottomColor: '#000',
@@ -340,10 +427,26 @@ const styles = StyleSheet.create({
     backgroundColor: '#007ADE',
     color: '#004F91',
     width: '80%',
-    marginTop: 35,
     alignItems: 'center',
     justifyContent: 'center',
     height: '10%',
+    bottom: 10,
+  },
+  modalBackground: {
+    flex: 1,
+    alignItems: 'center',
+    flexDirection: 'column',
+    justifyContent: 'space-around',
+    backgroundColor: '#00000040',
+  },
+  activityIndicatorWrapper: {
+    backgroundColor: '#FFFFFF',
+    height: 50,
+    width: 50,
+    borderRadius: 10,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-around',
   },
 });
 
