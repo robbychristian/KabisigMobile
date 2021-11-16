@@ -37,6 +37,8 @@ import VulnerabilityMap from './screens/Features/VulnerabilityMap';
 import EvacuationCenter from './screens/Features/EvacuationCenter';
 //Edit Profile
 import EditProfile from './screens/Features/EditProfile';
+//Chat
+import ChatRoom from './screens/Features/Chat/ChatRoom';
 
 function HomeScreen() {
   return <Protocols />;
@@ -52,6 +54,10 @@ function IndividualAnnouncementScreen() {
 
 function VulnerabilityMapScreen() {
   return <VulnerabilityMap />;
+}
+
+function ChatRoomScreen() {
+  return <ChatRoom />;
 }
 
 function EditProfileScreen() {
@@ -135,6 +141,15 @@ const HomeStack = createNativeStackNavigator();
 const AnnouncementStack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
 const ReportStack = createNativeStackNavigator();
+const ChatStack = createNativeStackNavigator();
+
+const ChatStackScreen = () => {
+  return (
+    <ChatStack.Navigator screenOptions={{headerShown: false}}>
+      <ChatStack.Screen name="Chat Room" component={ChatRoomScreen} />
+    </ChatStack.Navigator>
+  );
+};
 
 const ProtocolStackScreen = () => {
   return (
@@ -233,6 +248,15 @@ const DrawerStackScreen = () => {
         name="Evacuation Center"
         component={EvacuationCenterScreen}
       />
+      <Drawer.Screen
+        options={{
+          drawerIcon: ({color, size}) => (
+            <Icon name="comments" size={size} color={color} />
+          ),
+        }}
+        name="Chat"
+        component={ChatStackScreen}
+      />
     </Drawer.Navigator>
   );
 };
@@ -242,7 +266,7 @@ const HomeStackScreen = () => {
       screenOptions={{
         headerShown: false,
       }}>
-      <HomeStack.Screen name="Welcome" component={WelcomeScreen} />
+      <HomeStack.Screen name="Welcome" component={ChatStackScreen} />
       <HomeStack.Screen name="Login" component={LoginScreen} />
       <HomeStack.Screen
         name="FirstRegister"

@@ -80,11 +80,13 @@ function LoginScreen() {
                     ],
                   });
                 } else if (response.data[0].is_deactivated == 1) {
+                  setLoading(false);
                   Alert.alert(
                     'Deactivated account',
                     'This account has been deactivated. Ask for the barangay official to activate the account.',
                   );
                 } else {
+                  setLoading(false);
                   Alert.alert(
                     'Verify Email',
                     'Verify your email before logging in!',
@@ -92,6 +94,7 @@ function LoginScreen() {
                 }
               })
               .catch(function (error) {
+                setLoading(false);
                 console.log(error);
               });
           }
