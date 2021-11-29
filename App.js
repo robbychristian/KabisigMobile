@@ -31,6 +31,7 @@ import IndividualAnnouncement from './screens/Features/IndividualAnnouncement';
 //Reports
 import Reports from './screens/Features/Reports/Reports';
 import AddReports from './screens/Features/Reports/AddReports';
+import IndividualReports from './screens/Features/Reports/IndividualReports';
 //Vulnerability Map
 import VulnerabilityMap from './screens/Features/VulnerabilityMap';
 //Evacuation Center
@@ -39,6 +40,7 @@ import EvacuationCenter from './screens/Features/EvacuationCenter';
 import EditProfile from './screens/Features/EditProfile';
 //Chat
 import ChatRoom from './screens/Features/Chat/ChatRoom';
+import Chat from './screens/Features/Chat/Chat';
 
 function HomeScreen() {
   return <Protocols />;
@@ -60,6 +62,10 @@ function ChatRoomScreen() {
   return <ChatRoom />;
 }
 
+function ChatScreen() {
+  return <Chat />;
+}
+
 function EditProfileScreen() {
   return <EditProfile />;
 }
@@ -74,6 +80,10 @@ function ReportScreen() {
 
 function AddReportScreen() {
   return <AddReports />;
+}
+
+function IndividualReportScreen() {
+  return <IndividualReports />;
 }
 
 function EarthquakeScreen() {
@@ -147,6 +157,7 @@ const ChatStackScreen = () => {
   return (
     <ChatStack.Navigator screenOptions={{headerShown: false}}>
       <ChatStack.Screen name="Chat Room" component={ChatRoomScreen} />
+      <ChatStack.Screen name="P2P Chat" component={ChatScreen} />
     </ChatStack.Navigator>
   );
 };
@@ -186,6 +197,10 @@ const ReportStackScreen = () => {
     <ReportStack.Navigator screenOptions={{headerShown: false}}>
       <ReportStack.Screen name="ShowReports" component={ReportScreen} />
       <ReportStack.Screen name="AddReport" component={AddReportScreen} />
+      <ReportStack.Screen
+        name="Individual Report"
+        component={IndividualReportScreen}
+      />
     </ReportStack.Navigator>
   );
 };
@@ -266,7 +281,7 @@ const HomeStackScreen = () => {
       screenOptions={{
         headerShown: false,
       }}>
-      <HomeStack.Screen name="Welcome" component={ChatStackScreen} />
+      <HomeStack.Screen name="Welcome" component={WelcomeScreen} />
       <HomeStack.Screen name="Login" component={LoginScreen} />
       <HomeStack.Screen
         name="FirstRegister"

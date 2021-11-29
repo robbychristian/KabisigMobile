@@ -108,6 +108,26 @@ function Reports() {
       });
   };
 
+  const openIndividualReport = (
+    title,
+    description,
+    loc_img,
+    status,
+    created_at,
+  ) => {
+    navigation.push('Individual Report', {
+      image:
+        'https://kabisigapp.com/KabisigGit/storage/app/public/report_imgs/' +
+        user.id +
+        '/' +
+        loc_img,
+      title: title,
+      description: description,
+      status: status,
+      created_at: created_at,
+    });
+  };
+
   const onRefresh = () => {
     setData([]);
     getData();
@@ -165,7 +185,17 @@ function Reports() {
               data={data}
               keyExtractor={({id}, index) => id}
               renderItem={({item, index}) => (
-                <View style={styles.content}>
+                <TouchableOpacity
+                  style={styles.content}
+                  onPress={() =>
+                    openIndividualReport(
+                      item.title,
+                      item.description,
+                      item.loc_img,
+                      item.status,
+                      item.created_at,
+                    )
+                  }>
                   <View style={{flex: 2}}>
                     <Image
                       source={{
@@ -198,7 +228,7 @@ function Reports() {
                     }}>
                     <Icon name="trash" size={30} color="#d9534f" />
                   </TouchableOpacity>
-                </View>
+                </TouchableOpacity>
               )}
             />
           </View>

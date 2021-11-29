@@ -26,6 +26,7 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import {format, formatDistance, formatRelative, subDays} from 'date-fns';
 import {Dimensions} from 'react-native';
 import axios from 'axios';
+import moment from 'moment';
 
 function IndividualAnnouncement() {
   const route = useRoute();
@@ -45,7 +46,9 @@ function IndividualAnnouncement() {
           </View>
           <View style={{paddingHorizontal: 10, paddingVertical: 3}}>
             <Text style={styles.announceName}>{name}</Text>
-            <Text style={styles.announceDate}>{time}</Text>
+            <Text style={styles.announceDate}>
+              {moment(time).format('LLLL')}
+            </Text>
           </View>
         </View>
 

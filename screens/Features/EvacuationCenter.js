@@ -37,7 +37,7 @@ function EvacuationCenter() {
   const [location, setLocation] = useState([]);
   const [isLoading, setLoading] = useState(true);
   const context = useContext(UserContext);
-  const brgy = context.brgy;
+  const barangayLoc = context.brgy;
   const [region, setRegion] = useState({
     longitude: 121.085039,
     latitude: 14.615522,
@@ -56,8 +56,44 @@ function EvacuationCenter() {
     mapView.animateToRegion(r, 2000);
   };
   useEffect(() => {
+    if (barangayLoc == 'Barangay Santolan') {
+      setRegion({
+        longitude: 121.088,
+        latitude: 14.6131,
+        latitudeDelta: 0.008,
+        longitudeDelta: 0.008,
+      });
+    } else if (barangayLoc == 'Barangay Manggahan') {
+      setRegion({
+        latitude: 14.601887,
+        longitude: 121.093698,
+        latitudeDelta: 0.008,
+        longitudeDelta: 0.008,
+      });
+    } else if (barangayLoc == 'Barangay Dela Paz') {
+      setRegion({
+        latitude: 14.6137,
+        longitude: 121.096,
+        latitudeDelta: 0.008,
+        longitudeDelta: 0.008,
+      });
+    } else if (barangayLoc == 'Barangay Maybunga') {
+      setRegion({
+        latitude: 14.5763,
+        longitude: 121.085,
+        latitudeDelta: 0.008,
+        longitudeDelta: 0.008,
+      });
+    } else if (barangayLoc == 'Barangay Rosario') {
+      setRegion({
+        latitude: 14.5885,
+        longitude: 121.0891,
+        latitudeDelta: 0.008,
+        longitudeDelta: 0.008,
+      });
+    }
     axios({
-      url: 'https://kabisigapp.com/api/evacuationcenters/' + brgy,
+      url: 'https://kabisigapp.com/api/evacuationcenters/' + barangayLoc,
       method: 'GET',
     })
       .then(function (response) {

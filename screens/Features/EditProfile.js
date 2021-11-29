@@ -9,6 +9,8 @@ import {
   KeyboardAvoidingView,
   Alert,
   FlatList,
+  Modal,
+  ActivityIndicator,
   ScrollView,
 } from 'react-native';
 import {
@@ -37,6 +39,7 @@ function EditProfile() {
   const contactNo = context.contactNo;
   const profilePic = context.profilePic;
   const homeAdd = context.homeAdd;
+  const [loading, setLoading] = useState(false);
   //new Values
   const [newFName, setNewFName] = useState(context.fname);
   const [newMName, setNewMName] = useState(context.mname);
@@ -47,8 +50,8 @@ function EditProfile() {
   const [newPass, setNewPass] = useState('');
   const [confPass, setConfPass] = useState('');
   const [photo, setPhoto] = useState('');
-  const [imgUri, setImgUri] = useState('');
-  const [imgName, setImgName] = useState('');
+  const [imgUri, setImgUri] = useState(context.profilePic);
+  const [imgName, setImgName] = useState(context.profilePic);
 
   const {validate, isFieldInError, getErrorsInField, getErrorMessages} =
     useValidation({
@@ -60,6 +63,7 @@ function EditProfile() {
         newContactNo,
         newPass,
         confPass,
+        photo,
       },
     });
 
@@ -86,10 +90,12 @@ function EditProfile() {
             maxlength: 11,
             numbers: true,
           },
+          photo: {required: true},
           newPass: {required: true, minlength: 8},
           confPass: {required: true, equalPassword: newPass},
         })
       ) {
+        setLoading(true);
         checkPassForm.append('id', context.id);
         checkPassForm.append('pass', currPass);
         axios({
@@ -127,6 +133,7 @@ function EditProfile() {
                 },
               })
                 .then(function (response) {
+                  setLoading(false);
                   Alert.alert('Profile Updated', 'Profile has been updated');
                   context.setID(id);
                   context.setFName(newFName);
@@ -141,41 +148,50 @@ function EditProfile() {
                   console.log(error);
                 });
             } else {
-              console.log('eroroasd');
+              setLoading('false');
+              Alert.alert('Current password is wrong!');
             }
           })
           .catch(function (error) {
             console.log(checkPassForm);
           });
       } else {
-        isFieldInError('newFName') &&
+        if (isFieldInError('newFName')) {
           getErrorsInField('newFName').map(e => {
             Alert.alert('A field is not properly field', e);
           });
-        isFieldInError('newMName') &&
+        } else if (isFieldInError('newMName')) {
           getErrorsInField('newMName').map(e => {
             Alert.alert('A field is not properly field', e);
           });
-        isFieldInError('newLName') &&
+        } else if (isFieldInError('newLName')) {
           getErrorsInField('newLName').map(e => {
             Alert.alert('A field is not properly field', e);
           });
-        isFieldInError('currPass') &&
+        } else if (isFieldInError('currPass')) {
           getErrorsInField('currPass').map(e => {
             Alert.alert('A field is not properly field', e);
           });
-        isFieldInError('newContactNo') &&
+        } else if (isFieldInError('newContactNo')) {
           getErrorsInField('newContactNo').map(e => {
             Alert.alert('A field is not properly field', e);
           });
-        isFieldInError('newPass') &&
+        } else if (isFieldInError('newPass')) {
           getErrorsInField('newPass').map(e => {
             Alert.alert('A field is not properly field', e);
           });
-        isFieldInError('confPass') &&
+        } else if (isFieldInError('confPass')) {
           getErrorsInField('confPass').map(e => {
             Alert.alert('A field is not properly field', e);
           });
+        } else if (isFieldInError('photo')) {
+          getErrorsInField('photo').map(e => {
+            Alert.alert(
+              'Submission error!',
+              'You must include a new profile picture!',
+            );
+          });
+        }
       }
     } else {
       console.log('loop 1');
@@ -208,6 +224,13 @@ function EditProfile() {
 
   return (
     <SafeAreaView style={styles.background}>
+      <Modal transparent={true} visible={loading}>
+        <View style={styles.modalBackground}>
+          <View style={styles.activityIndicatorWrapper}>
+            <ActivityIndicator animating={loading} color="blue" />
+          </View>
+        </View>
+      </Modal>
       <ScrollView>
         <View style={{flexDirection: 'column'}}>
           <View
@@ -403,6 +426,22 @@ const styles = StyleSheet.create({
     borderColor: '#004F91',
     backgroundColor: '#fff',
     height: 40,
+  },
+  modalBackground: {
+    flex: 1,
+    alignItems: 'center',
+    flexDirection: 'column',
+    justifyContent: 'space-around',
+    backgroundColor: '#00000040',
+  },
+  activityIndicatorWrapper: {
+    backgroundColor: '#FFFFFF',
+    height: 50,
+    width: 50,
+    borderRadius: 10,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-around',
   },
 });
 

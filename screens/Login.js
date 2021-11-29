@@ -100,6 +100,7 @@ function LoginScreen() {
           }
         })
         .catch(function (error) {
+          setLoading(false);
           console.log(error);
         });
     } else {

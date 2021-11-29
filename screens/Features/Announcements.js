@@ -25,6 +25,7 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import {format, formatDistance, formatRelative, subDays} from 'date-fns';
 import {Dimensions} from 'react-native';
 import axios from 'axios';
+import moment from 'moment';
 
 import {useRoute} from '@react-navigation/native';
 
@@ -92,7 +93,10 @@ function Announcements() {
                     style={{paddingLeft: 15}}></Icon>
                   <View style={styles.announceContainer}>
                     <Text style={styles.announceTextTitle}>{item.title}</Text>
-                    <Text style={styles.announcedate}>{item.created_at}</Text>
+                    <Text style={styles.announcedate}>
+                      {moment(item.created_at).format('LL')} at{' '}
+                      {moment(item.created_at).format('LT')}
+                    </Text>
                   </View>
                 </TouchableOpacity>
               </View>
