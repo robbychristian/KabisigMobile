@@ -17,13 +17,14 @@ import {
   Header,
 } from '@react-navigation/native-stack';
 import {NavigationContainer} from '@react-navigation/native';
-import {UserContext} from '../../provider/UserProvider';
+import {UserContext} from '../../../provider/UserProvider';
 import {useNavigation} from '@react-navigation/native';
 import {CommonActions} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {format, formatDistance, formatRelative, subDays} from 'date-fns';
 import {Dimensions} from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {PermissionsAndroid} from 'react-native';
 import {
   CONNECTED,
@@ -55,9 +56,13 @@ import {
   sendMessage,
 } from 'react-native-wifi-p2p';
 import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
+import {openDatabase} from 'react-native-sqlite-storage';
 
 function ChatRoom() {
+  const db = openDatabase({name: 'chats.db'});
+
   const navigator = useNavigation();
+  const context = useContext(UserContext);
   const [messageReceived, setMessageReceived] = useState('');
   const [messageSent, setMessageSent] = useState('');
   const [availableDevices, setAvailableDevices] = useState([]);
@@ -79,7 +84,12 @@ function ChatRoom() {
       .then(() =>
         subscribeOnThisDeviceChanged(event => {
           if (event.owner.status == 4) {
-            navigator.push('P2P Chat');
+            navigator.push('P2P Chat', {
+              user: {
+                _id: context.id,
+                fname: context.fname,
+              },
+            });
           }
         }),
       )
@@ -91,7 +101,12 @@ function ChatRoom() {
     createGroup('name')
       .then(() => console.log('Group created successfully!'))
       .then(() => {
-        navigator.push('P2P Chat');
+        navigator.push('P2P Chat', {
+          user: {
+            _id: context.id,
+            fname: context.fname,
+          },
+        });
       })
       .catch(err => console.error('Something gone wrong. Details: ', err))
       .finally(setRoomCreated(true));
@@ -102,7 +117,15 @@ function ChatRoom() {
     removeGroup()
       .then(() => console.log("Currently you don't belong to group!"))
       .catch(err => console.error('Something gone wrong. Details: ', err))
-      .finally(setRoomCreated(false));
+      .finally(() => {
+        const destroyTable = async () => {
+          db.transaction(function (txn) {
+            txn.executeSql('DROP TABLE chats');
+          });
+        };
+        destroyTable();
+        console.log('destroyed successfully');
+      });
   };
 
   //Send message
