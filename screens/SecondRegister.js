@@ -30,10 +30,14 @@ const SecondRegisterScreen = () => {
   const pass = route.params.pass;
   const cpass = route.params.cpass;
   const [loading, setLoading] = useState(false);
+  //profile pic
   const [photo, setPhoto] = useState();
-  const [imgType, setImgType] = useState();
   const [imgUri, setImgUri] = useState();
   const [imgName, setImgName] = useState();
+  //valid id
+  const [id, setId] = useState();
+  const [idUri, setIdUri] = useState();
+  const [idName, setIdName] = useState();
 
   const [home_add, sethome_add] = useState(null);
   const [brgy, setSelectedBrgy] = useState(null);
@@ -47,7 +51,7 @@ const SecondRegisterScreen = () => {
       state: {brgy, mbday, dbday, ybday, cnum},
     });
 
-  const openCamera = () => {
+  const profilePic = () => {
     const options = {
       storageOptions: {
         saveToPhotos: true,
@@ -66,9 +70,37 @@ const SecondRegisterScreen = () => {
       } else {
         setPhoto(response);
         console.log(photo);
-        setImgType(response.assets[0].type);
         setImgUri(response.assets[0].uri);
         setImgName(response.assets[0].fileName);
+        console.log(response.assets[0].uri);
+        console.log(response.assets[0].fileName);
+      }
+    });
+  };
+
+  const validID = () => {
+    const options = {
+      storageOptions: {
+        saveToPhotos: true,
+        mediaType: 'photo',
+        path: 'images',
+      },
+    };
+    launchCamera(options, response => {
+      if (response.didCancel) {
+        console.log('User cancelled image picker');
+      } else if (response.error) {
+        console.log('ImagePicker Error: ', response.error);
+      } else if (response.customButton) {
+        console.log('User tapped custom button: ', response.customButton);
+        alert(response.customButton);
+      } else {
+        setId(response);
+        console.log(id);
+        setIdUri(response.assets[0].uri);
+        setIdName(response.assets[0].fileName);
+        console.log(response.assets[0].uri);
+        console.log(response.assets[0].fileName);
       }
     });
   };
@@ -103,7 +135,13 @@ const SecondRegisterScreen = () => {
         type: 'multipart/form-data',
         name: imgName,
       };
+      let id = {
+        uri: idUri,
+        type: 'multipart/form-data',
+        name: idName,
+      };
       formdata.append('file', file);
+      formdata.append('validID', id);
       formdata.append('fname', fname);
       formdata.append('mname', mname);
       formdata.append('lname', lname);
@@ -127,6 +165,7 @@ const SecondRegisterScreen = () => {
         },
       })
         .then(function (response) {
+          console.log(response);
           Alert.alert('Success!', 'Account has been registered!');
           setLoading(false);
           navigation.navigate('Login');
@@ -358,26 +397,49 @@ const SecondRegisterScreen = () => {
           keyboardType="number-pad"
           onChangeText={setcnum}
         />
-        <View
-          style={{
-            flex: 1,
-            borderWidth: 2,
-            borderColor: '#004F91',
-            height: '30%',
-            width: '80%',
-            justifyContent: 'center',
-            marginHorizontal: 10,
-            marginVertical: 20,
-            backgroundColor: '#004F91',
-          }}>
-          <TouchableOpacity
-            style={{alignItems: 'center', justifyContent: 'center'}}
-            onPress={openCamera}>
-            <Icon name="camera" color="#fff" size={40} />
-            <Text style={{fontSize: 15, fontWeight: 'bold', color: 'white'}}>
-              Take a photo
-            </Text>
-          </TouchableOpacity>
+        <View style={{flexDirection: 'row'}}>
+          <View
+            style={{
+              flex: 1,
+              borderWidth: 2,
+              borderColor: '#004F91',
+              height: '50%',
+              width: '80%',
+              justifyContent: 'center',
+              marginHorizontal: 10,
+              marginVertical: 20,
+              backgroundColor: '#004F91',
+            }}>
+            <TouchableOpacity
+              style={{alignItems: 'center', justifyContent: 'center'}}
+              onPress={profilePic}>
+              <Icon name="camera" color="#fff" size={40} />
+              <Text style={{fontSize: 15, fontWeight: 'bold', color: 'white'}}>
+                Profile Picture
+              </Text>
+            </TouchableOpacity>
+          </View>
+          <View
+            style={{
+              flex: 1,
+              borderWidth: 2,
+              borderColor: '#004F91',
+              height: '50%',
+              width: '80%',
+              justifyContent: 'center',
+              marginHorizontal: 10,
+              marginVertical: 20,
+              backgroundColor: '#004F91',
+            }}>
+            <TouchableOpacity
+              style={{alignItems: 'center', justifyContent: 'center'}}
+              onPress={validID}>
+              <Icon name="id-card" color="#fff" size={40} />
+              <Text style={{fontSize: 15, fontWeight: 'bold', color: 'white'}}>
+                Valid ID
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
         <TouchableOpacity style={styles.nextBtn} onPress={submitForm}>
           <Text style={{color: '#FFF'}}>Submit</Text>
@@ -430,7 +492,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     height: '10%',
-    bottom: 10,
+    bottom: 70,
   },
   modalBackground: {
     flex: 1,

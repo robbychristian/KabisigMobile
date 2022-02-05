@@ -17,7 +17,7 @@ import {
 import {NavigationContainer} from '@react-navigation/native';
 import {useNavigation} from '@react-navigation/native';
 import {CommonActions} from '@react-navigation/native';
-import Icon from 'react-native-vector-icons/FontAwesome';
+import Icon from 'react-native-vector-icons/FontAwesome5';
 import {UserContext} from '../../provider/UserProvider';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {format, formatDistance, formatRelative, subDays} from 'date-fns';
@@ -36,6 +36,11 @@ import axios from 'axios';
 function EvacuationCenter() {
   const [location, setLocation] = useState([]);
   const [isLoading, setLoading] = useState(true);
+  const [evacName, setEvacName] = useState();
+  const [landmark, setLandmark] = useState();
+  const [phoneNo, setPhoneNo] = useState();
+  const [capacity, setCapacity] = useState();
+  const [availability, setAvailability] = useState();
   const context = useContext(UserContext);
   const barangayLoc = context.brgy;
   const [region, setRegion] = useState({
@@ -54,6 +59,14 @@ function EvacuationCenter() {
       longitudeDelta: 7.5,
     };
     mapView.animateToRegion(r, 2000);
+  };
+
+  const showDetails = (evacName, landmark, phoneNo, capacity, availability) => {
+    setEvacName(evacName);
+    setLandmark(landmark);
+    setPhoneNo(phoneNo);
+    setCapacity(capacity);
+    setAvailability(availability);
   };
   useEffect(() => {
     if (barangayLoc == 'Barangay Santolan') {
@@ -102,7 +115,7 @@ function EvacuationCenter() {
       .catch(function (e) {
         console.log(e);
       });
-  }, []);
+  }, [evacName, landmark, phoneNo, capacity, availability]);
   return (
     <SafeAreaView>
       <MapView
@@ -117,13 +130,61 @@ function EvacuationCenter() {
             <Marker
               key={index}
               coordinate={{
-                latitude: parseFloat(data.lat),
-                longitude: parseFloat(data.lng),
+                latitude: parseFloat(data.evac_latitude),
+                longitude: parseFloat(data.evac_longitude),
+              }}
+              onPress={(
+                evacName,
+                landmark,
+                phoneNo,
+                capacity,
+                availability,
+              ) => {
+                showDetails(
+                  data.evac_name,
+                  data.nearest_landmark,
+                  data.phone_no,
+                  data.capacity,
+                  data.availability,
+                );
               }}
             />
           );
         })}
       </MapView>
+      <View style={[styles.card, styles.elevation]}>
+        <View style={styles.cardAlign}>
+          <Text
+            style={{
+              color: 'black',
+              fontWeight: 'bold',
+              fontSize: 20,
+              color: '#004F91',
+            }}>
+            {evacName}
+          </Text>
+        </View>
+        <View style={styles.cardAlign}>
+          <Text style={{color: 'black', fontWeight: 'bold'}}>Landmark: </Text>
+          <Text style={{color: 'black'}}>{landmark}</Text>
+        </View>
+        <View style={styles.cardAlign}>
+          <Text style={{color: 'black', fontWeight: 'bold'}}>
+            Phone Number:{' '}
+          </Text>
+          <Text style={{color: 'black'}}>{phoneNo}</Text>
+        </View>
+        <View style={styles.cardAlign}>
+          <Text style={{color: 'black', fontWeight: 'bold'}}>Capacity: </Text>
+          <Text style={{color: 'black'}}>{capacity}</Text>
+        </View>
+        <View style={styles.cardAlign}>
+          <Text style={{color: 'black', fontWeight: 'bold'}}>
+            Availability:{' '}
+          </Text>
+          <Text style={{color: 'black'}}>{availability}</Text>
+        </View>
+      </View>
     </SafeAreaView>
   );
 }
@@ -131,11 +192,30 @@ function EvacuationCenter() {
 const styles = StyleSheet.create({
   container: {
     //...StyleSheet.absoluteFillObject,
-    height: Dimensions.get('window').height,
+    height: Dimensions.get('window').height / 1.5,
     width: Dimensions.get('window').width,
   },
   map: {
     //...StyleSheet.absoluteFillObject,
+  },
+
+  cardAlign: {
+    flexDirection: 'row',
+  },
+
+  card: {
+    borderLeftWidth: 3,
+    borderLeftColor: '#004F91',
+    backgroundColor: 'white',
+    borderRadius: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+    width: '100%',
+    marginVertical: 10,
+  },
+  elevation: {
+    elevation: 2,
+    shadowColor: '#52006A',
   },
 });
 

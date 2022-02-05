@@ -80,6 +80,8 @@ function ChatRoom() {
     connect(deviceAddress)
       .then(() => {
         console.log('Successfully connected');
+        getInfo();
+        receive();
       })
       .then(() =>
         subscribeOnThisDeviceChanged(event => {
@@ -104,7 +106,7 @@ function ChatRoom() {
         navigator.push('P2P Chat', {
           user: {
             _id: context.id,
-            fname: context.fname,
+            name: context.fname,
           },
         });
       })

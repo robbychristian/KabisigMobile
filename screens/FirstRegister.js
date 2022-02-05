@@ -45,7 +45,14 @@ const FirstRegisterScreen = () => {
         mname: {minlength: 2, required: true},
         lname: {minlength: 2, required: true},
         email: {email: true, require: true},
-        pass: {minlength: 8, require: true},
+        pass: {
+          minlength: 8,
+          require: true,
+          hasNumber: true,
+          hasUpperCase: true,
+          hasLowerCase: true,
+          hasSpecialCharacter: true,
+        },
         confPass: {equalPassword: pass},
       })
     ) {

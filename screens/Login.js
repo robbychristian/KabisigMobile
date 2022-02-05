@@ -58,7 +58,10 @@ function LoginScreen() {
             })
               .then(function (response) {
                 setLoading(false);
-                if (response.data[0].email_verified_at != null) {
+                if (
+                  response.data[0].email_verified_at != null &&
+                  response.data[0].is_valid == 1
+                ) {
                   user.id = response.data[0].id;
                   user.fname = response.data[0].first_name;
                   user.mname = response.data[0].middle_name;
@@ -82,13 +85,19 @@ function LoginScreen() {
                 } else if (response.data[0].is_deactivated == 1) {
                   setLoading(false);
                   Alert.alert(
-                    'Deactivated account',
+                    'Deactivated account!',
                     'This account has been deactivated. Ask for the barangay official to activate the account.',
+                  );
+                } else if (response.data[0].is_valid == 0) {
+                  setLoading(false);
+                  Alert.alert(
+                    'Account not verified!',
+                    'Contact your barangay for verification of your Valid ID',
                   );
                 } else {
                   setLoading(false);
                   Alert.alert(
-                    'Verify Email',
+                    'Verify Email!',
                     'Verify your email before logging in!',
                   );
                 }
@@ -104,6 +113,7 @@ function LoginScreen() {
           console.log(error);
         });
     } else {
+      setLoading(false);
       Alert.alert(
         'Field(s) are empty!',
         'Email field and password field are required!',
