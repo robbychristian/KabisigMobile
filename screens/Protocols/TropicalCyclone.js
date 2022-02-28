@@ -9,6 +9,7 @@ import {
   Text,
   StyleSheet,
   ScrollView,
+  ActivityIndicator,
 } from 'react-native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {NavigationContainer} from '@react-navigation/native';
@@ -20,7 +21,9 @@ function TropicalCyclone() {
   const [before, setBefore] = useState([]);
   const [during, setDuring] = useState([]);
   const [after, setAfter] = useState([]);
+  const [loading, setLoading] = useState(false);
   useEffect(() => {
+    setLoading(true);
     axios({
       url: 'https://kabisigapp.com/api/cyclone',
       method: 'GET',
@@ -40,45 +43,54 @@ function TropicalCyclone() {
           setAfter(prevItem => [...prevItem, item]);
         }
       });
+      setLoading(false);
     });
   }, []);
   return (
     <SafeAreaView style={styles.background}>
-      <ScrollView>
-        <Text style={styles.timeDisater}>BEFORE</Text>
-        <FlatList
-          data={before}
-          style={{marginBottom: 15}}
-          keyExtractor={({id}, index) => id}
-          renderItem={({item}) => (
-            <View style={[styles.card, styles.elevation]}>
-              <Text style={styles.guideContent}>{item.guideline}</Text>
-            </View>
-          )}
-        />
-        <Text style={styles.timeDisater}>DURING</Text>
-        <FlatList
-          data={during}
-          style={{marginBottom: 15}}
-          keyExtractor={({id}, index) => id}
-          renderItem={({item}) => (
-            <View style={[styles.card, styles.elevation]}>
-              <Text style={styles.guideContent}>{item.guideline}</Text>
-            </View>
-          )}
-        />
-        <Text style={styles.timeDisater}>AFTER</Text>
-        <FlatList
-          data={after}
-          style={{marginBottom: 15}}
-          keyExtractor={({id}, index) => id}
-          renderItem={({item}) => (
-            <View style={[styles.card, styles.elevation]}>
-              <Text style={styles.guideContent}>{item.guideline}</Text>
-            </View>
-          )}
-        />
-      </ScrollView>
+      {loading ? (
+        <View style={styles.modalBackground}>
+          <View style={styles.activityIndicatorWrapper}>
+            <ActivityIndicator size="large" animating={loading} color="blue" />
+          </View>
+        </View>
+      ) : (
+        <ScrollView>
+          <Text style={styles.timeDisater}>BEFORE</Text>
+          <FlatList
+            data={before}
+            style={{marginBottom: 15}}
+            keyExtractor={({id}, index) => id}
+            renderItem={({item}) => (
+              <View style={[styles.card, styles.elevation]}>
+                <Text style={styles.guideContent}>{item.guideline}</Text>
+              </View>
+            )}
+          />
+          <Text style={styles.timeDisater}>DURING</Text>
+          <FlatList
+            data={during}
+            style={{marginBottom: 15}}
+            keyExtractor={({id}, index) => id}
+            renderItem={({item}) => (
+              <View style={[styles.card, styles.elevation]}>
+                <Text style={styles.guideContent}>{item.guideline}</Text>
+              </View>
+            )}
+          />
+          <Text style={styles.timeDisater}>AFTER</Text>
+          <FlatList
+            data={after}
+            style={{marginBottom: 15}}
+            keyExtractor={({id}, index) => id}
+            renderItem={({item}) => (
+              <View style={[styles.card, styles.elevation]}>
+                <Text style={styles.guideContent}>{item.guideline}</Text>
+              </View>
+            )}
+          />
+        </ScrollView>
+      )}
     </SafeAreaView>
   );
 }
@@ -143,6 +155,19 @@ const styles = StyleSheet.create({
   elevation: {
     elevation: 2,
     shadowColor: '#52006A',
+  },
+  modalBackground: {
+    flex: 1,
+    alignItems: 'center',
+    flexDirection: 'column',
+    justifyContent: 'space-around',
+  },
+  activityIndicatorWrapper: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 10,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-around',
   },
 });
 

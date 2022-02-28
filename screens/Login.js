@@ -106,6 +106,12 @@ function LoginScreen() {
                 setLoading(false);
                 console.log(error);
               });
+          } else {
+            setLoading(false);
+            Alert.alert(
+              'Incorrect Credentials',
+              'Check if your email and password is correct!',
+            );
           }
         })
         .catch(function (error) {
