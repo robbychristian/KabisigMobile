@@ -372,19 +372,6 @@ function EditProfile() {
               }}>
               <Text style={{color: 'white'}}>Submit</Text>
             </TouchableOpacity>
-            <TouchableOpacity
-              style={{
-                marginTop: 10,
-                borderWidth: 1,
-                borderColor: '#004F91',
-                //borderRadius: 50,'
-                backgroundColor: '#004F91',
-                padding: 10,
-                marginBottom: 20,
-                marginLeft: 10,
-              }}>
-              <Text style={{color: 'white'}}>Cancel</Text>
-            </TouchableOpacity>
           </View>
         </View>
       </ScrollView>

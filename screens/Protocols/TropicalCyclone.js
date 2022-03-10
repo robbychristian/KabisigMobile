@@ -135,7 +135,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: 'black',
     flexShrink: 1,
-    textTransform: 'capitalize',
     marginLeft: 5,
   },
   copyright: {

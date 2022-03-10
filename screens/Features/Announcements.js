@@ -34,7 +34,7 @@ function Announcements() {
   const navigation = useNavigation();
   const context = useContext(UserContext);
   const brgy = context.brgy;
-  const [isLoading, setLoading] = useState(true);
+  const [isLoading, setLoading] = useState(false);
   const [data, setData] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   useEffect(() => {

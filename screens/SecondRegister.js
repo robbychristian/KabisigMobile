@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   KeyboardAvoidingView,
   View,
@@ -30,6 +30,10 @@ const SecondRegisterScreen = () => {
   const pass = route.params.pass;
   const cpass = route.params.cpass;
   const [loading, setLoading] = useState(false);
+
+  //all brgys
+  const [brgys, setBrgys] = useState([]);
+
   //profile pic
   const [photo, setPhoto] = useState();
   const [imgUri, setImgUri] = useState();
@@ -77,6 +81,15 @@ const SecondRegisterScreen = () => {
       }
     });
   };
+
+  useEffect(() => {
+    axios({
+      url: 'https://kabisigapp.com/api/allBrgys',
+      method: 'GET',
+    }).then(response => {
+      setBrgys(response.data);
+    });
+  }, []);
 
   const validID = () => {
     const options = {
@@ -171,12 +184,22 @@ const SecondRegisterScreen = () => {
           navigation.navigate('Login');
         })
         .catch(function (error) {
+          setLoading(false);
           console.log(error);
+
+          if (error == 'Error: Request failed with status code 429') {
+            Alert.alert(
+              'Invalid Request',
+              'Too many request have been made. Wait for awhile to send another registration!',
+            );
+          } else {
+            Alert.alert('Error', error);
+          }
         });
     } else {
       isFieldInError('cnum') &&
         getErrorsInField('cnum').map(e => {
-          Alert.alert('A field is not properly field', e);
+          Alert.alert('A field is not properly filled', e);
         });
     }
   };
@@ -207,7 +230,17 @@ const SecondRegisterScreen = () => {
             selectedValue={brgy}
             itemStyle={{fontSize: 20}}
             onValueChange={setSelectedBrgy}>
-            <Picker.Item label="Choose a barangay" value="" />
+            <Picker.Item label="Choose a Barangay" value="" />
+            {brgys.map((buttonInfo, id) => {
+              return (
+                <Picker.Item
+                  label={buttonInfo.brgy_loc}
+                  value={buttonInfo.brgy_loc}
+                />
+              );
+            })}
+
+            {/*<Picker.Item label="Choose a barangay" value="" />
             <Picker.Item label="Barangay Santolan" value="Barangay Santolan" />
             <Picker.Item label="Barangay Dela Paz" value="Barangay Dela Paz" />
             <Picker.Item
@@ -215,7 +248,7 @@ const SecondRegisterScreen = () => {
               value="Barangay Manggahan"
             />
             <Picker.Item label="Barangay Maybunga" value="Barangay Maybunga" />
-            <Picker.Item label="Barangay Rosario" value="Barangay Rosario" />
+  <Picker.Item label="Barangay Rosario" value="Barangay Rosario" />*/}
           </Picker>
         </TouchableOpacity>
         <TouchableOpacity style={styles.pickerContainer}>

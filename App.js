@@ -41,7 +41,9 @@ import EditProfile from './screens/Features/EditProfile';
 //Chat
 import ChatRoom from './screens/Features/Chat/ChatRoom';
 import Chat from './screens/Features/Chat/Chat';
-
+import {LogBox} from 'react-native';
+LogBox.ignoreLogs(['Warning: ...']); // Ignore log notification by message
+LogBox.ignoreAllLogs(); //Ignore all log notifications
 function HomeScreen() {
   return <Protocols />;
 }
